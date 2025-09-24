@@ -29,6 +29,8 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 //	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
+	implementation 'com.nimbusds:nimbus-jose-jwt:9.47'
+	implementation 'org.springframework.boot:spring-boot-starter-validation:3.3.4'
 	implementation 'com.github.darrachequesne:spring-data-jpa-datatables:6.0.1'
 	implementation 'org.mapstruct:mapstruct:1.6.3'
 

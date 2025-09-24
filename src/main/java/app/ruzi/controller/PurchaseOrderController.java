@@ -1,8 +1,8 @@
 package app.ruzi.controller;
 
 import app.ruzi.configuration.messaging.HandlerService;
-import app.ruzi.entity.PurchaseOrder;
-import app.ruzi.service.app.PurchaseOrderService;
+//import app.ruzi.entity.PurchaseOrder;
+//import app.ruzi.service.app.PurchaseOrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
@@ -17,13 +17,13 @@ import org.springframework.web.bind.annotation.*;
 public class PurchaseOrderController {
 
     private final HandlerService handlerService;
-    private final PurchaseOrderService purchaseOrderService;
+//    private final PurchaseOrderService purchaseOrderService;
 
-    @PostMapping("/read-table-data")
-    public ResponseEntity<Object> read_table_data(@RequestBody @Valid DataTablesInput dataTablesInput) {
-        DataTablesOutput<PurchaseOrder> privilegeDataTablesOutput = purchaseOrderService.read_table_data(dataTablesInput);
-        return new ResponseEntity<>(privilegeDataTablesOutput, HttpStatus.OK);
-    }
+//    @PostMapping("/read-table-data")
+//    public ResponseEntity<Object> read_table_data(@RequestBody @Valid DataTablesInput dataTablesInput) {
+//        DataTablesOutput<PurchaseOrder> privilegeDataTablesOutput = purchaseOrderService.read_table_data(dataTablesInput);
+//        return new ResponseEntity<>(privilegeDataTablesOutput, HttpStatus.OK);
+//    }
 
 
 

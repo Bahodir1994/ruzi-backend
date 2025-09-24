@@ -1,4 +1,4 @@
-package app.expertisebnt.configuration.messaging;
+package app.ruzi.configuration.messaging;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
