@@ -56,8 +56,8 @@ public class ProductService implements ProductServiceImplement{
             String searchValue = column.getSearch().getValue();
             if (column.getSearchable() && searchValue != null && !searchValue.isBlank()) {
                 specs.add(new DynamicFilterSpecification<>(column.getData(), searchValue));
+                column.getSearch().setValue("");
             }
-            column.getSearch().setValue("");
         });
 
         Specification<Product> dateSpec = new DateRangeSpecification<>(
