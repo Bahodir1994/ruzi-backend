@@ -1,36 +1,25 @@
 package app.ruzi.entity.app;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
+import java.util.List;
 
 @Entity
-@Table(name = "unit", schema = "ruzi")
+@Table(
+        name = "unit",
+        schema = "ruzi"
+)
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Unit {
+
     @Id
-    @Column(length = 3)
+    @Column(name = "code", length = 10, nullable = false, unique = true)
     private String code;
 
-    @Column(nullable = false)
-    private String nameEn;
-
-    @Column(nullable = false)
-    private String nameRu;
-
-    @Column(nullable = false)
-    private String nameOz;
-
-    @Column(nullable = false)
-    private String nameUz;
-
-    @Column(nullable = false)
-    private String name;
-
+    @OneToMany(mappedBy = "unit", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<UnitTranslation> translations;
 }
