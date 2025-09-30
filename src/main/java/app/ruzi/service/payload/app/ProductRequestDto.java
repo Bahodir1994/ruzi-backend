@@ -1,6 +1,6 @@
 package app.ruzi.service.payload.app;
 
-import app.ruzi.entity.app.Product;
+import app.ruzi.entity.app.Item;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 
 /**
- * DTO for {@link Product}
+ * DTO for {@link Item}
  */
 @AllArgsConstructor
 @Getter

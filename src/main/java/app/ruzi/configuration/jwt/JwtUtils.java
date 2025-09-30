@@ -38,10 +38,10 @@ public class JwtUtils {
         String postId = claims.getStringClaim("post_code");
 
         Map<String, Object> bkoAccess = (Map<String, Object>) claims.getClaim("resource_access");
-        if (bkoAccess == null || !bkoAccess.containsKey("lab")) {
+        if (bkoAccess == null || !bkoAccess.containsKey("ruzi")) {
             throw new RuntimeException("Forbidden");
         }
-        Map<String, Object> bkoRolesObject = (Map<String, Object>) bkoAccess.get("lab");
+        Map<String, Object> bkoRolesObject = (Map<String, Object>) bkoAccess.get("ruzi");
         if (bkoRolesObject == null || !bkoRolesObject.containsKey("roles")) {
             throw new RuntimeException("Forbidden");
         }

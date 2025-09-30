@@ -1,6 +1,6 @@
 package app.ruzi.repository.app;
 
-import app.ruzi.entity.app.Product;
+import app.ruzi.entity.app.Item;
 import org.springframework.data.jpa.datatables.repository.DataTablesRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -11,10 +11,10 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Long>, DataTablesRepository<Product, Long> {
+public interface ProductRepository extends JpaRepository<Item, Long>, DataTablesRepository<Item, Long> {
 
     @Modifying
-    @Query("delete from Product as p where p.id in :idList")
+    @Query("delete from Item as p where p.id in :idList")
     void deleteAllByIdList(@Param("idList") List<String> idList);
 
 }

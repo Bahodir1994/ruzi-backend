@@ -1,12 +1,12 @@
 package app.ruzi.service.payload.app;
 
-import app.ruzi.entity.app.Product;
+import app.ruzi.entity.app.Item;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 
 /**
- * DTO for {@link Product}
+ * DTO for {@link Item}
  */
 public record ProductDto(
         Long id,

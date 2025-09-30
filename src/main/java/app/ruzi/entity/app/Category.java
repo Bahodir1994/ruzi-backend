@@ -39,10 +39,16 @@ public class Category extends AbstractAuditingEntity {
     @JoinColumn(name = "parent_id")
     private Category parent;
 
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Item> items;
+
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Category> children;
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CategoryTranslation> translations;
+
+    @Column(name = "primary_image_url", length = 300)
+    private String primaryImageUrl;
 
 }

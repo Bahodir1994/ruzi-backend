@@ -1,6 +1,6 @@
 package app.ruzi.service.app.product;
 
-import app.ruzi.entity.app.Product;
+import app.ruzi.entity.app.Item;
 import app.ruzi.service.payload.app.ProductDto;
 import app.ruzi.service.payload.app.ProductRequestDto;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
@@ -19,6 +19,6 @@ public interface ProductServiceImplement {
     void update(ProductRequestDto productRequestDto);
 
     /* Tables */
-    DataTablesOutput<Product> readTableProduct(DataTablesInput dataTablesInput);
+    DataTablesOutput<Item> readTableProduct(DataTablesInput dataTablesInput);
 
 }

@@ -33,6 +33,24 @@ public class HandlerService {
     }
 
     /**
+     * For without validation methods
+     */
+    public MessageResponse handleRequest(
+            Supplier<Object> supplier,
+            String langType
+    ) {
+        return validationService.method_v2(null, langType)
+                .map(validationErrorResponse ->
+                        new MessageResponse("error", false, validationErrorResponse, HttpStatus.BAD_REQUEST))
+                .orElseGet(() -> {
+                    Object data = supplier.get();
+                    return new MessageResponse("success", true, data, HttpStatus.OK);
+                });
+    }
+
+
+
+    /**
      * For void methods
      */
     public MessageResponse handleRequest(
@@ -41,6 +59,23 @@ public class HandlerService {
             String langType
     ) {
         return validationService.method_v1(bindingResult, langType)
+                .map(validationErrorResponse ->
+                        new MessageResponse("error", false, validationErrorResponse, HttpStatus.BAD_REQUEST))
+                .orElseGet(() -> {
+                    action.run();
+                    return new MessageResponse("success", true, null, HttpStatus.OK);
+                });
+    }
+
+
+    /**
+     * For void and without binding methods
+     */
+    public MessageResponse handleRequest(
+            Runnable action,
+            String langType
+    ) {
+        return validationService.method_v2(null, langType)
                 .map(validationErrorResponse ->
                         new MessageResponse("error", false, validationErrorResponse, HttpStatus.BAD_REQUEST))
                 .orElseGet(() -> {
