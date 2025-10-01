@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 
 /**
  * DTO for {@link Item}
@@ -20,7 +19,6 @@ public class ProductRequestDto implements Serializable {
     private final String brand;
     private final String category;
     private final String unit;
-    private final BigDecimal defaultSalePrice;
     private final String description;
     private final Boolean isActive;
 }

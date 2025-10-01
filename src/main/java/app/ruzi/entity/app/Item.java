@@ -28,10 +28,15 @@ public class Item extends AbstractAuditingEntity {
     @Column(name = "id", length = 50, nullable = false)
     private String id;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "client_id", nullable = false)
+    @JsonIgnore
+    private Client client;
+
     @Column(name = "code", length = 100, nullable = false)
     private String code;
 
-    @Column(name = "name", length = 255, nullable = false)
+    @Column(name = "name", length = 600, nullable = false)
     private String name;
 
     @Column(name = "price")
@@ -47,6 +52,21 @@ public class Item extends AbstractAuditingEntity {
 
     @Column(name = "primary_image_url", length = 300)
     private String primaryImageUrl;
+
+    @Column(unique = true, nullable = false, length = 50)
+    private String skuCode;
+
+    @Column(unique = true, length = 100)
+    private String barcode;
+
+    @Column(length = 200)
+    private String brand;
+
+    @Column(length = 3)
+    private String unit;
+
+    @Column(length = 600)
+    private String description;
 }
 
 

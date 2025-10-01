@@ -1,10 +1,13 @@
 package app.ruzi.entity.app;
 
 import app.ruzi.configuration.utils.AbstractAuditingEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 
-import java.util.List;
+import java.util.Set;
+
 @Entity
 @Table(
         name = "category",
@@ -30,25 +33,24 @@ public class Category extends AbstractAuditingEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "client_id", nullable = false)
+    @JsonIgnore
     private Client client;
 
     @Column(name = "code", length = 100, nullable = false)
     private String code;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id")
-    private Category parent;
+    @Column(name = "parent_id", length = 50)
+    private String parentDd;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Item> items;
-
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Category> children;
-
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CategoryTranslation> translations;
+    @OneToMany(
+            mappedBy = "category",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @BatchSize(size = 20)
+    private Set<Item> items;
 
     @Column(name = "primary_image_url", length = 300)
     private String primaryImageUrl;
-
 }

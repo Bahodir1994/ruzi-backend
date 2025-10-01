@@ -3,8 +3,8 @@ package app.ruzi.controller;
 import app.ruzi.configuration.annotation.auth.MethodInfo;
 import app.ruzi.configuration.messaging.HandlerService;
 import app.ruzi.configuration.messaging.MessageResponse;
-import app.ruzi.entity.app.Category;
-import app.ruzi.service.app.category.CategoryService;
+import app.ruzi.entity.app.Unit;
+import app.ruzi.service.app.unit.UnitService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
@@ -14,28 +14,28 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/route-category")
+@RequestMapping("/route-unit")
 @RequiredArgsConstructor
-public class CategoryController {
+public class UnitController {
 
     private final HandlerService handlerService;
-    private final CategoryService categoryService;
+    private final UnitService unitService;
 
     @PostMapping("/data-table-main")
     //@CustomAuthRole(roles = {"ROLE_CATEGORY_READ"})
-    @MethodInfo(methodName = "read-category-table")
+    @MethodInfo(methodName = "read-item-table")
     public ResponseEntity<Object> getCategoryTable(@RequestBody @Valid DataTablesInput dataTablesInput) {
-        DataTablesOutput<Category> privilegeDataTablesOutput = categoryService.getCategories(dataTablesInput);
+        DataTablesOutput<Unit> privilegeDataTablesOutput = unitService.getUnit(dataTablesInput);
         return new ResponseEntity<>(privilegeDataTablesOutput, HttpStatus.OK);
     }
 
     @GetMapping("/data-list-main")
     //@CustomAuthRole(roles = {"ROLE_CATEGORY_READ"})
-    @MethodInfo(methodName = "read-category-list")
+    @MethodInfo(methodName = "read-item-list")
     public ResponseEntity<Object> getCategoryList(
             @RequestHeader(value = "Accept-Language", required = false) String langType) {
         MessageResponse messageResponse = handlerService.handleRequest(
-                categoryService::getCategoryList,
+                unitService::getUnitList,
                 langType
         );
         return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);

@@ -1,22 +1,21 @@
-package app.ruzi.service.app.product;
+package app.ruzi.service.app.item;
 
 import app.ruzi.entity.app.Item;
-import app.ruzi.service.payload.app.ProductDto;
-import app.ruzi.service.payload.app.ProductRequestDto;
+import app.ruzi.service.payload.app.ItemDto;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
 import java.util.List;
 
-public interface ProductServiceImplement {
+public interface ItemServiceImplement {
     /* Method*/
-    void create(ProductRequestDto productRequestDto);
+    void create(ItemDto itemDto);
 
-    ProductDto read(ProductRequestDto productRequestDto);
+    ItemDto read(ItemDto itemDto);
 
     void delete(List<String> idList);
 
-    void update(ProductRequestDto productRequestDto);
+    void update(ItemDto itemDto);
 
     /* Tables */
     DataTablesOutput<Item> readTableProduct(DataTablesInput dataTablesInput);

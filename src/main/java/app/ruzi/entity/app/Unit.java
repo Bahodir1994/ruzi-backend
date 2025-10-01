@@ -1,8 +1,10 @@
 package app.ruzi.entity.app;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.*;
-import java.util.List;
 
 @Entity
 @Table(
@@ -17,9 +19,9 @@ import java.util.List;
 public class Unit {
 
     @Id
-    @Column(name = "code", length = 10, nullable = false, unique = true)
+    @Column(name = "code", length = 3, nullable = false, unique = true)
     private String code;
 
-    @OneToMany(mappedBy = "unit", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<UnitTranslation> translations;
+    @Column(name = "name", length = 100, nullable = false)
+    private String name;
 }

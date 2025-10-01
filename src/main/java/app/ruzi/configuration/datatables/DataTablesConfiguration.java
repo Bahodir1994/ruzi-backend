@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EnableJpaRepositories(
         basePackages = "app.ruzi.repository",
         repositoryFactoryBeanClass = DataTablesRepositoryFactoryBean.class
-)public class DataTablesConfiguration {}
+)
+public class DataTablesConfiguration {
+}

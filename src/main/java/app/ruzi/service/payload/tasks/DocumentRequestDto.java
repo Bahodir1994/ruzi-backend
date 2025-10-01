@@ -1,6 +1,5 @@
 package app.ruzi.service.payload.tasks;
 
-import app.ruzi.configuration.annotation.notfoundcolumn.NotFoundId;
 import app.ruzi.configuration.annotation.validfile.ValidFile;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
