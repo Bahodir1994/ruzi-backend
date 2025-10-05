@@ -7,6 +7,8 @@ import app.ruzi.entity.app.Warehouse;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(
         name = "stock",
@@ -56,24 +58,29 @@ public class Stock extends AbstractAuditingEntity {
     /**
      * real qoldiq
      */
-    @Column(name = "quantity", nullable = false)
-    private Integer quantity = 0;
+    @Column(name = "quantity", precision = 18, scale = 3, nullable = false)
+    private BigDecimal quantity = BigDecimal.ZERO;
 
     /**
-     * savatlarga rezerv qilingan
+     * Savatlarga rezerv qilingan miqdor.
+     * Masalan, kassir savatga qo‘shgan, lekin hali to‘lov qilinmagan mahsulot miqdori.
+     * Ombordagi real miqdordan ajratilgan, lekin hali chiqim qilinmagan.
      */
-    @Column(name = "reserved_quantity", nullable = false)
-    private Integer reservedQuantity = 0;
+    @Column(name = "reserved_quantity", precision = 18, scale = 3, nullable = false)
+    private BigDecimal reservedQuantity = BigDecimal.ZERO;
 
     /**
-     * minimal zaxira
+     * Minimal zaxira (threshold) — ogohlantirish uchun.
+     * Masalan, zaxira 5 kg dan past bo‘lsa, tizim signal beradi.
      */
-    @Column(name = "min_threshold")
-    private Integer minThreshold = 0;
+    @Column(name = "min_threshold", precision = 18, scale = 3)
+    private BigDecimal minThreshold = BigDecimal.ZERO;
 
     /**
-     * maksimal qoldiq
+     * Maksimal zaxira (optional).
+     * Masalan, bu tovar uchun 100 kg dan ortiq saqlanmasin.
      */
-    @Column(name = "max_threshold")
-    private Integer maxThreshold;
+    @Column(name = "max_threshold", precision = 18, scale = 3)
+    private BigDecimal maxThreshold;
+
 }

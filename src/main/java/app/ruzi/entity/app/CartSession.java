@@ -1,45 +1,73 @@
-//package app.ruzi.entity;
-//
-//import jakarta.persistence.*;
-//import lombok.*;
-//
-//import java.math.BigDecimal;
-//import java.time.LocalDateTime;
-//import java.util.List;
-//
-//@Entity
-//@Table(name = "cart_sessions", schema = "ruzi")
-//@Getter
-//@Setter
-//@NoArgsConstructor
-//@AllArgsConstructor
-//@Builder
-//public class CartSession {
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    private Long id;
-//
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "employee_id", nullable = false)
-//    private Employee employee;
-//
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "warehouse_id", nullable = false)
-//    private Warehouse warehouse;
-//
-//    @Enumerated(EnumType.STRING)
-//    private Status status = Status.OPEN; // OPEN / CHECKED_OUT / CANCELLED
-//
-//    private LocalDateTime createdAt = LocalDateTime.now();
-//    private LocalDateTime closedAt; // yakunlangan vaqt
-//
-//    private String customerName; // optional: mijoz ismi
-//    private Long customerId;     // optional: mijozga ulash
-//
-//    private BigDecimal totalAmount = BigDecimal.ZERO;
-//
-//    @OneToMany(mappedBy = "cartSession", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<CartItem> items;
-//
-//    public enum Status { OPEN, CHECKED_OUT, CANCELLED }
-//}
+package app.ruzi.entity.app;
+
+import app.ruzi.configuration.utils.AbstractAuditingEntity;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Entity
+@Table(name = "cart_sessions", schema = "ruzi")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class CartSession extends AbstractAuditingEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
+
+    /** Qaysi klientga tegishli (multi-tenant) */
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "client_id", nullable = false)
+    private Client client;
+
+    /** Agar ushbu savdoni ma’lum bir usta olib kelgan bo‘lsa */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "referrer_id")
+    private Referrer referrer;
+
+    /** Kassir foydalanuvchi (Keycloak foydalanuvchisi) */
+    @Column(name = "created_by_user", length = 100, nullable = false)
+    private String createdByUser;
+
+    /** Qaysi omborda savdo bo‘layapti */
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "warehouse_id", nullable = false)
+    private Warehouse warehouse;
+
+    /** Savat holati: OPEN, CHECKED_OUT, CANCELLED */
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20, nullable = false)
+    private Status status = Status.OPEN;
+
+    /** Savdo sanasi */
+    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime closedAt;
+
+    /** Ixtiyoriy mijoz ma’lumotlari */
+    private String customerName;
+    private Long customerId;
+
+    /** Umumiy summa va to‘lov ma’lumotlari */
+    @Column(precision = 18, scale = 2)
+    private BigDecimal totalAmount = BigDecimal.ZERO;
+
+    @Column(precision = 18, scale = 2)
+    private BigDecimal paidAmount = BigDecimal.ZERO;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private PaymentType paymentType = PaymentType.CASH;
+
+    /** Savatdagi mahsulotlar */
+    @OneToMany(mappedBy = "cartSession", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CartItem> items;
+
+    public enum Status { OPEN, CHECKED_OUT, CANCELLED }
+    public enum PaymentType { CASH, CARD, MIXED }
+}

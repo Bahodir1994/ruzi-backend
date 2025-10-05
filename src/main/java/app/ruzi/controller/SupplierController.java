@@ -1,28 +1,29 @@
-//package app.ruzi.controller;
-//
-//import lombok.RequiredArgsConstructor;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.web.bind.annotation.*;
-//
-//@RestController
-//@RequestMapping("/api/suppliers")
-//@RequiredArgsConstructor
-//public class SupplierController {
-//
-//    private final SupplierService supplierService;
-//
-//    @GetMapping
-//    public ResponseEntity<List<SupplierDto>> getAll() { return ResponseEntity.ok().build(); }
-//
-//    @GetMapping("/{id}")
-//    public ResponseEntity<SupplierDto> getById(@PathVariable Long id) { return ResponseEntity.ok().build(); }
-//
-//    @PostMapping
-//    public ResponseEntity<SupplierDto> create(@RequestBody SupplierDto dto) { return ResponseEntity.ok().build(); }
-//
-//    @PutMapping("/{id}")
-//    public ResponseEntity<SupplierDto> update(@PathVariable Long id, @RequestBody SupplierDto dto) { return ResponseEntity.ok().build(); }
-//
-//    @DeleteMapping("/{id}")
-//    public ResponseEntity<Void> delete(@PathVariable Long id) { return ResponseEntity.noContent().build(); }
-//}
+package app.ruzi.controller;
+
+import app.ruzi.configuration.annotation.auth.MethodInfo;
+import app.ruzi.entity.app.Supplier;
+import app.ruzi.entity.app.Warehouse;
+import app.ruzi.service.app.supplier.SupplierService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
+import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/route-supplier")
+@RequiredArgsConstructor
+public class SupplierController {
+
+    private final SupplierService supplierService;
+
+    @PostMapping("/data-table-main")
+    //@CustomAuthRole(roles = {"ROLE_CATEGORY_READ"})
+    @MethodInfo(methodName = "read-supplier-table")
+    public ResponseEntity<Object> read_table_data(@RequestBody @Valid DataTablesInput dataTablesInput) {
+        DataTablesOutput<Supplier> privilegeDataTablesOutput = supplierService.getSupplier(dataTablesInput);
+        return new ResponseEntity<>(privilegeDataTablesOutput, HttpStatus.OK);
+    }
+}

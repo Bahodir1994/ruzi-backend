@@ -23,16 +23,16 @@ public class UnitController {
 
     @PostMapping("/data-table-main")
     //@CustomAuthRole(roles = {"ROLE_CATEGORY_READ"})
-    @MethodInfo(methodName = "read-item-table")
-    public ResponseEntity<Object> getCategoryTable(@RequestBody @Valid DataTablesInput dataTablesInput) {
+    @MethodInfo(methodName = "read-unit-table")
+    public ResponseEntity<Object> read_table_data(@RequestBody @Valid DataTablesInput dataTablesInput) {
         DataTablesOutput<Unit> privilegeDataTablesOutput = unitService.getUnit(dataTablesInput);
         return new ResponseEntity<>(privilegeDataTablesOutput, HttpStatus.OK);
     }
 
     @GetMapping("/data-list-main")
     //@CustomAuthRole(roles = {"ROLE_CATEGORY_READ"})
-    @MethodInfo(methodName = "read-item-list")
-    public ResponseEntity<Object> getCategoryList(
+    @MethodInfo(methodName = "read-unit-list")
+    public ResponseEntity<Object> read_list_data(
             @RequestHeader(value = "Accept-Language", required = false) String langType) {
         MessageResponse messageResponse = handlerService.handleRequest(
                 unitService::getUnitList,

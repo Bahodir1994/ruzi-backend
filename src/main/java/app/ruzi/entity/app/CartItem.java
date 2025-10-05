@@ -1,37 +1,57 @@
-//package app.ruzi.entity;
-//
-//import jakarta.persistence.*;
-//import lombok.*;
-//import java.math.BigDecimal;
-//
-//@Entity
-//@Table(name = "cart_items", schema = "ruzi", uniqueConstraints = {
-//        @UniqueConstraint(columnNames = {"cart_id", "product_id"})
-//})
-//@Getter
-//@Setter
-//@NoArgsConstructor
-//@AllArgsConstructor
-//@Builder
-//public class CartItem {
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    private Long id;
-//
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "cart_id", nullable = false)
-//    private CartSession cartSession;
-//
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "product_id", nullable = false)
-//    private Product product;
-//
-//    private Integer quantity;
-//
-//    private BigDecimal unitPrice;
-//
-//    private BigDecimal discount; // har bir mahsulot uchun chegirma
-//
-//    private BigDecimal lineTotal; // (quantity * unitPrice) - discount
-//}
-//
+package app.ruzi.entity.app;
+
+import app.ruzi.configuration.utils.AbstractAuditingEntity;
+import jakarta.persistence.*;
+import lombok.*;
+import java.math.BigDecimal;
+
+@Entity
+@Table(
+        name = "cart_item",
+        schema = "ruzi",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"cart_id", "purchase_order_item_id"})
+        }
+)
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class CartItem extends AbstractAuditingEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
+
+    /** Qaysi cart sessiyaga tegishli */
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "cart_id", nullable = false)
+    private CartSession cartSession;
+
+    /** Qaysi partiyadan chiqyapti (narx va batch shu yerdan olinadi) */
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "purchase_order_item_id", nullable = false)
+    private PurchaseOrderItem purchaseOrderItem;
+
+    /** Qaysi ombor zaxirasidan chiqyapti */
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "warehouse_id", nullable = false)
+    private Warehouse warehouse;
+
+    /** Sotilgan miqdor (kg, litr, dona ...) */
+    @Column(nullable = false, precision = 18, scale = 3)
+    private BigDecimal quantity = BigDecimal.ZERO;
+
+    /** Sotuv narxi (partiya narxidan olinadi) */
+    @Column(name = "unit_price", precision = 18, scale = 2)
+    private BigDecimal unitPrice;
+
+    /** Chegirma (ixtiyoriy) */
+    @Column(precision = 18, scale = 2)
+    private BigDecimal discount = BigDecimal.ZERO;
+
+    /** Yakuniy summa (quantity × price − discount) */
+    @Column(name = "line_total", precision = 18, scale = 2)
+    private BigDecimal lineTotal;
+}
