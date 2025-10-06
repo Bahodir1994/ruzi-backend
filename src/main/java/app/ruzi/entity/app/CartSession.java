@@ -21,39 +21,55 @@ public class CartSession extends AbstractAuditingEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    /** Qaysi klientga tegishli (multi-tenant) */
+    /**
+     * Qaysi klientga tegishli (multi-tenant)
+     */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;
 
-    /** Agar ushbu savdoni ma’lum bir usta olib kelgan bo‘lsa */
+    /**
+     * Agar ushbu savdoni ma’lum bir usta olib kelgan bo‘lsa
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "referrer_id")
     private Referrer referrer;
 
-    /** Kassir foydalanuvchi (Keycloak foydalanuvchisi) */
+    /**
+     * Kassir foydalanuvchi (Keycloak foydalanuvchisi)
+     */
     @Column(name = "created_by_user", length = 100, nullable = false)
     private String createdByUser;
 
-    /** Qaysi omborda savdo bo‘layapti */
+    /**
+     * Qaysi omborda savdo bo‘layapti
+     */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "warehouse_id", nullable = false)
     private Warehouse warehouse;
 
-    /** Savat holati: OPEN, CHECKED_OUT, CANCELLED */
+    /**
+     * Savat holati: OPEN, CHECKED_OUT, CANCELLED
+     */
     @Enumerated(EnumType.STRING)
     @Column(length = 20, nullable = false)
     private Status status = Status.OPEN;
 
-    /** Savdo sanasi */
+    /**
+     * Savdo sanasi
+     */
     private LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime closedAt;
 
-    /** Ixtiyoriy mijoz ma’lumotlari */
+    /**
+     * Ixtiyoriy mijoz ma’lumotlari
+     */
     private String customerName;
     private Long customerId;
 
-    /** Umumiy summa va to‘lov ma’lumotlari */
+    /**
+     * Umumiy summa va to‘lov ma’lumotlari
+     */
     @Column(precision = 18, scale = 2)
     private BigDecimal totalAmount = BigDecimal.ZERO;
 
@@ -64,10 +80,13 @@ public class CartSession extends AbstractAuditingEntity {
     @Column(length = 20)
     private PaymentType paymentType = PaymentType.CASH;
 
-    /** Savatdagi mahsulotlar */
+    /**
+     * Savatdagi mahsulotlar
+     */
     @OneToMany(mappedBy = "cartSession", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CartItem> items;
 
-    public enum Status { OPEN, CHECKED_OUT, CANCELLED }
-    public enum PaymentType { CASH, CARD, MIXED }
+    public enum Status {OPEN, CHECKED_OUT, CANCELLED}
+
+    public enum PaymentType {CASH, CARD, MIXED}
 }

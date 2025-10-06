@@ -1,9 +1,6 @@
-package app.ruzi.entity;
+package app.ruzi.entity.app;
 
 import app.ruzi.configuration.utils.AbstractAuditingEntity;
-import app.ruzi.entity.app.Client;
-import app.ruzi.entity.app.PurchaseOrderItem;
-import app.ruzi.entity.app.Warehouse;
 import jakarta.persistence.*;
 import lombok.*;
 

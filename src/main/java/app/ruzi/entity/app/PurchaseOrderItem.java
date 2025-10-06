@@ -60,11 +60,15 @@ public class PurchaseOrderItem {
     @JoinColumn(name = "item_id", nullable = false)
     private Item item;
 
-    /** Jismoniy birliklar soni (qop, dona, idish va h.k.) */
+    /**
+     * Jismoniy birliklar soni (qop, dona, idish va h.k.)
+     */
     @Column(name = "package_count", nullable = false)
     private Integer packageCount = 0;
 
-    /** Umumiy og‘irlik yoki hajm (kg, litr, metr) */
+    /**
+     * Umumiy og‘irlik yoki hajm (kg, litr, metr)
+     */
     @Column(name = "quantity", precision = 18, scale = 3, nullable = false)
     private BigDecimal quantity = BigDecimal.ZERO;
 

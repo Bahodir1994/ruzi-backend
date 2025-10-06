@@ -1,10 +1,7 @@
 package app.ruzi.service.app.supplier;
 
 import app.ruzi.entity.app.Supplier;
-import app.ruzi.entity.app.Warehouse;
 import app.ruzi.repository.app.SupplierRepository;
-import app.ruzi.repository.app.WarehouseRepository;
-import app.ruzi.service.app.warehouse.WarehouseServiceImplement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
