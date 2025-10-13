@@ -1,6 +1,8 @@
 package app.ruzi.entity.app;
 
 import app.ruzi.configuration.utils.AbstractAuditingEntity;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,6 +21,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class CartItem extends AbstractAuditingEntity {
 
     @Id
@@ -30,6 +33,7 @@ public class CartItem extends AbstractAuditingEntity {
      */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "cart_id", nullable = false)
+    @JsonBackReference
     private CartSession cartSession;
 
     /**

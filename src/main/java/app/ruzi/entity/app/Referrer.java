@@ -1,6 +1,7 @@
 package app.ruzi.entity.app;
 
 import app.ruzi.configuration.utils.AbstractAuditingEntity;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,6 +17,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Referrer extends AbstractAuditingEntity {
 
     @Id

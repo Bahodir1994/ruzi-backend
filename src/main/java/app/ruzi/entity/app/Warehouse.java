@@ -37,4 +37,8 @@ public class Warehouse extends AbstractAuditingEntity {
 
     @Column(name = "status", length = 20)
     private String status; // ACTIVE, INACTIVE
+
+    public Warehouse(String warehouseId) {
+        this.id = warehouseId;
+    }
 }

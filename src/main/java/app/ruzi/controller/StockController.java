@@ -29,5 +29,7 @@ public class StockController {
         DataTablesOutput<StockViewDto> privilegeDataTablesOutput = stockService.getStock(dataTablesInput);
         return new ResponseEntity<>(privilegeDataTablesOutput, HttpStatus.OK);
     }
+
+
 }
 

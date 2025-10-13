@@ -3,7 +3,9 @@ package app.ruzi.configuration.annotation.auth;
 import app.ruzi.configuration.jwt.JwtUtils;
 import app.ruzi.configuration.jwt.RoleAndPermissionDto;
 import app.ruzi.configuration.jwt.UserJwt;
+import app.ruzi.configuration.utils.CurrentTenantProvider;
 import app.ruzi.configuration.utils.CurrentUserProvider;
+import app.ruzi.configuration.utils.CurrentWarehouseProvider;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -29,6 +31,10 @@ public class CustomAuthAspect {
         UserJwt userJwt = jwtUtils.extractUserFromToken();
 
         CurrentUserProvider.setCurrentUser(userJwt.getUsername());
+        CurrentTenantProvider.setCurrentClient(userJwt.getClientId());
+        CurrentWarehouseProvider.setCurrentWarehouse(userJwt.getWarehouseId());
+
+        System.out.println(CurrentTenantProvider.getCurrentClient());
 
         String[] requiredRoles = customAuthRole.roles();
         String[] requiredPermissions = customAuthRole.permissions();

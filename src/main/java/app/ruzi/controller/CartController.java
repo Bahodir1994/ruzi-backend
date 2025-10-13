@@ -1,38 +1,86 @@
-//package app.ruzi.controller;
-//
-//import lombok.RequiredArgsConstructor;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.web.bind.annotation.*;
-//
-//@RestController
-//@RequestMapping("/api/carts")
-//@RequiredArgsConstructor
-//public class CartController {
-//
-//    private final CartService cartService;
-//
-//    @GetMapping
-//    public ResponseEntity<List<CartDto>> getAll() { return ResponseEntity.ok().build(); }
-//
-//    @GetMapping("/{id}")
-//    public ResponseEntity<CartDto> getById(@PathVariable Long id) { return ResponseEntity.ok().build(); }
-//
-//    @PostMapping
-//    public ResponseEntity<CartDto> create(@RequestBody CartDto dto) { return ResponseEntity.ok().build(); }
-//
-//    @PostMapping("/{id}/items")
-//    public ResponseEntity<CartItemDto> addItem(@PathVariable Long id, @RequestBody CartItemDto dto) { return ResponseEntity.ok().build(); }
-//
-//    @PatchMapping("/{id}/items/{itemId}")
-//    public ResponseEntity<CartItemDto> updateItem(@PathVariable Long id, @PathVariable Long itemId, @RequestBody CartItemDto dto) { return ResponseEntity.ok().build(); }
-//
-//    @DeleteMapping("/{id}/items/{itemId}")
-//    public ResponseEntity<Void> deleteItem(@PathVariable Long id, @PathVariable Long itemId) { return ResponseEntity.noContent().build(); }
-//
-//    @PostMapping("/{id}/checkout")
-//    public ResponseEntity<Void> checkout(@PathVariable Long id) { return ResponseEntity.ok().build(); }
-//
-//    @PostMapping("/{id}/cancel")
-//    public ResponseEntity<Void> cancel(@PathVariable Long id) { return ResponseEntity.ok().build(); }
-//}
-//
+package app.ruzi.controller;
+
+import app.ruzi.configuration.annotation.auth.CustomAuthRole;
+import app.ruzi.configuration.annotation.auth.MethodInfo;
+import app.ruzi.configuration.messaging.HandlerService;
+import app.ruzi.configuration.messaging.MessageResponse;
+import app.ruzi.service.app.cart.CartService;
+import app.ruzi.service.payload.app.AddCartItemDto;
+import app.ruzi.service.payload.app.CreateCartDto;
+import app.ruzi.service.payload.app.UpdateCartItemDto;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+
+@RestController
+@RequestMapping("/route-cart")
+@RequiredArgsConstructor
+public class CartController {
+
+    private final CartService cartService;
+    private final HandlerService handlerService;
+
+    @PostMapping("/create")
+    @CustomAuthRole(roles = {"ROLE_CART_CREATE"})
+    @MethodInfo(methodName = "create-card-session")
+    public ResponseEntity<?> create(
+            @RequestHeader(value = "Accept-Language", required = false) String langType,
+            @Valid @RequestBody(required = false) CreateCartDto dto,
+            BindingResult bindingResult
+    ) {
+        MessageResponse messageResponse = handlerService.handleRequest(
+                () -> cartService.createSession(dto),
+                bindingResult,
+                langType
+        );
+        return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
+    }
+
+    @PostMapping("/add-item")
+    @CustomAuthRole(roles = {"ROLE_CART_CREATE"})
+    @MethodInfo(methodName = "add-item-to-card")
+    public ResponseEntity<?> addItem(
+            @RequestHeader(value = "Accept-Language", required = false) String langType,
+            @RequestBody AddCartItemDto dto) {
+        MessageResponse messageResponse = handlerService.handleRequest(
+                () -> cartService.addItem(dto),
+                langType
+        );
+        return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
+
+    }
+
+    @PostMapping("/update-item")
+    @CustomAuthRole(roles = {"ROLE_CART_CREATE"})
+    @MethodInfo(methodName = "update-item-quantity")
+    public ResponseEntity<?> updateItem(
+            @RequestHeader(value = "Accept-Language", required = false) String langType,
+            @Valid @RequestBody UpdateCartItemDto dto
+    ) {
+        MessageResponse messageResponse = handlerService.handleRequest(
+                () -> cartService.updateItemQuantity(dto),
+                langType
+        );
+        return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
+    }
+
+    @GetMapping("/get-item/{cartSessionId}")
+    @CustomAuthRole(roles = {"ROLE_CART_CREATE"})
+    @MethodInfo(methodName = "get-item-quantity")
+    public ResponseEntity<?> getItem(
+            @RequestHeader(value = "Accept-Language", required = false) String langType,
+            @PathVariable("cartSessionId") String cartSessionId
+    ) {
+        MessageResponse messageResponse = handlerService.handleRequest(
+                () -> cartService.getItemsBySessionId(cartSessionId),
+                langType
+        );
+        return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
+    }
+
+}
+

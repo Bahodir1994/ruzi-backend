@@ -80,4 +80,11 @@ public class Stock extends AbstractAuditingEntity {
     @Column(name = "max_threshold", precision = 18, scale = 3)
     private BigDecimal maxThreshold;
 
+
+    @Transient
+    public BigDecimal getAvailableQuantity() {
+        BigDecimal q = (quantity != null) ? quantity : BigDecimal.ZERO;
+        BigDecimal r = (reservedQuantity != null) ? reservedQuantity : BigDecimal.ZERO;
+        return q.subtract(r);
+    }
 }

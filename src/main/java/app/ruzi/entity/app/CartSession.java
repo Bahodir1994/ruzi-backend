@@ -1,8 +1,12 @@
 package app.ruzi.entity.app;
 
 import app.ruzi.configuration.utils.AbstractAuditingEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -15,6 +19,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class CartSession extends AbstractAuditingEntity {
 
     @Id
@@ -34,6 +39,10 @@ public class CartSession extends AbstractAuditingEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "referrer_id")
     private Referrer referrer;
+
+    @Column(name = "cart_number", length = 20, unique = true, nullable = false)
+    private String cartNumber;
+
 
     /**
      * Kassir foydalanuvchi (Keycloak foydalanuvchisi)
@@ -58,7 +67,10 @@ public class CartSession extends AbstractAuditingEntity {
     /**
      * Savdo sanasi
      */
+    @CreationTimestamp
+    @Column(updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
     private LocalDateTime closedAt;
 
     /**
@@ -84,6 +96,7 @@ public class CartSession extends AbstractAuditingEntity {
      * Savatdagi mahsulotlar
      */
     @OneToMany(mappedBy = "cartSession", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<CartItem> items;
 
     public enum Status {OPEN, CHECKED_OUT, CANCELLED}

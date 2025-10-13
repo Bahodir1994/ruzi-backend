@@ -13,6 +13,8 @@ import java.util.List;
 @Setter
 public class UserJwt {
     private String userId;
+    private String clientId;
+    private String warehouseId;
     private String username;
     private String fullName;
     private String locationCode;
