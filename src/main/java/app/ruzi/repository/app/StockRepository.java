@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -23,5 +24,23 @@ public interface StockRepository extends JpaRepository<Stock, String>, DataTable
             LockModeType lockMode
     );
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT s FROM Stock s WHERE s.id = :id")
+    Optional<Stock> findByIdForUpdate(@Param("id") String id);
+
     Optional<Stock> findByPurchaseOrderItemAndWarehouse(PurchaseOrderItem poi, Warehouse warehouse);
+
+    List<Stock>  findAllByPurchaseOrderItemIdInAndWarehouseIdIn(List<String> poiIds, List<String> whIds);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+        SELECT s FROM Stock s
+        WHERE s.purchaseOrderItem.id = :purchaseOrderItemId
+          AND s.warehouse.id = :warehouseId
+    """)
+    Optional<Stock> findByPurchaseOrderItemAndWarehouse_Locked(
+            @Param("purchaseOrderItemId") String purchaseOrderItemId,
+            @Param("warehouseId") String warehouseId,
+            LockModeType lockMode
+    );
 }

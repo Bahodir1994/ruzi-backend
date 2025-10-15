@@ -11,6 +11,7 @@ import app.ruzi.service.app.stock.StockWebSocketService;
 import app.ruzi.service.payload.app.*;
 import jakarta.persistence.LockModeType;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -124,7 +126,6 @@ public class CartService {
         wsService.broadcastStockUpdate(toDto(stock));
     }
 
-
     /** Savatchadagi tovar sonini ozgartirish */
     public void updateItemQuantity(UpdateCartItemDto dto) {
         CartItem item = cartItemRepository.findById(dto.cartItemId())
@@ -165,29 +166,135 @@ public class CartService {
 
     @Transactional(readOnly = true)
     public List<CartItemViewDto> getItemsBySessionId(String sessionId) {
-        return cartItemRepository.findByCartSession_IdOrderByInsTimeDesc(sessionId)
-                .stream()
-                .map(item -> {
-                    // Har bir item uchun tegishli stockni topamiz
-                    var stockOpt = stockRepository.findByPurchaseOrderItemAndWarehouse(
-                            item.getPurchaseOrderItem(), item.getWarehouse());
+        var items = cartItemRepository.findByCartSession_IdOrderByInsTimeDesc(sessionId);
 
-                    BigDecimal available = stockOpt
-                            .map(s -> s.getQuantity().subtract(s.getReservedQuantity()))
-                            .orElse(BigDecimal.ZERO);
+        // Stocklarni bulk query orqali olish
+        var poiIds = items.stream().map(i -> i.getPurchaseOrderItem().getId()).toList();
+        var whIds = items.stream().map(i -> i.getWarehouse().getId()).toList();
 
-                    return CartItemViewDto.builder()
-                            .cartItemId(item.getId())
-                            .purchaseOrderItemId(item.getPurchaseOrderItem().getId())
-                            .itemName(item.getPurchaseOrderItem().getItem().getName())
-                            .quantity(item.getQuantity())
-                            .unitPrice(item.getUnitPrice())
-                            .lineTotal(item.getLineTotal())
-                            .available(available)
-                            .warehouseName(item.getWarehouse().getName())
-                            .build();
-                })
-                .toList();
+        var stockList = stockRepository.findAllByPurchaseOrderItemIdInAndWarehouseIdIn(poiIds, whIds);
+        var stockMap = stockList.stream().collect(Collectors.toMap(
+                s -> s.getPurchaseOrderItem().getId() + "_" + s.getWarehouse().getId(),
+                s -> s
+        ));
+
+        return items.stream().map(item -> {
+            var key = item.getPurchaseOrderItem().getId() + "_" + item.getWarehouse().getId();
+            var stock = stockMap.get(key);
+            BigDecimal available = stock != null ? stock.getQuantity().subtract(stock.getReservedQuantity()) : BigDecimal.ZERO;
+            return CartItemViewDto.builder()
+                    .cartItemId(item.getId())
+                    .purchaseOrderItemId(item.getPurchaseOrderItem().getId())
+                    .itemName(item.getPurchaseOrderItem().getItem().getName())
+                    .quantity(item.getQuantity())
+                    .unitPrice(item.getUnitPrice())
+                    .lineTotal(item.getLineTotal())
+                    .available(available)
+                    .warehouseName(item.getWarehouse().getName())
+                    .build();
+        }).toList();
+    }
+
+    @Modifying
+    @Transactional
+    public void deleteItem(String cartItemId) {
+        CartItem item = cartItemRepository.findById(cartItemId)
+                .orElseThrow(() -> new IllegalArgumentException("Cart item topilmadi"));
+
+        // 🔹 Tegishli stockni pessimistic lock bilan olamiz
+        Stock stock = stockRepository.findByPurchaseOrderItem_Locked(
+                        item.getPurchaseOrderItem().getId(), LockModeType.PESSIMISTIC_WRITE)
+                .orElseThrow(() -> new IllegalStateException("Stock topilmadi"));
+
+        // 🔹 ReservedQuantity ni kamaytiramiz
+        BigDecimal reserved = stock.getReservedQuantity().subtract(item.getQuantity());
+        if (reserved.compareTo(BigDecimal.ZERO) < 0) reserved = BigDecimal.ZERO;
+        stock.setReservedQuantity(reserved);
+
+        // 🔹 Saqlash
+        stockRepository.save(stock);
+
+        // 🔹 Itemni o‘chirish
+        cartItemRepository.delete(item);
+
+        // 🔹 WebSocket orqali yangilanishni yuboramiz
+        wsService.broadcastStockUpdate(toDto(stock));
+    }
+
+    @Modifying
+    @Transactional
+    public void deleteCart(String cartSessionId) {
+        // 1️⃣ Barcha cart itemlarni bir yo‘la olish (fetch bilan)
+        List<CartItem> items = cartItemRepository.findAllByCartSessionIdWithRelations(cartSessionId);
+
+        if (items.isEmpty()) {
+            // agar bo‘sh bo‘lsa, faqat sessiyani o‘chir
+            cartSessionRepository.deleteById(cartSessionId);
+            return;
+        }
+
+        // 2️⃣ Har bir item uchun stock ni lock qilib, reservedQuantity ni kamaytirish
+        for (CartItem item : items) {
+            String purchaseOrderItemId = item.getPurchaseOrderItem().getId();
+            String warehouseId = item.getWarehouse().getId();
+
+            Stock stock = stockRepository.findByPurchaseOrderItemAndWarehouse_Locked(
+                    purchaseOrderItemId, warehouseId, LockModeType.PESSIMISTIC_WRITE
+            ).orElse(null);
+
+            if (stock != null) {
+                BigDecimal newReserved = stock.getReservedQuantity().subtract(item.getQuantity());
+                if (newReserved.compareTo(BigDecimal.ZERO) < 0)
+                    newReserved = BigDecimal.ZERO;
+
+                stock.setReservedQuantity(newReserved);
+                stockRepository.save(stock);
+
+                wsService.broadcastStockUpdate(toDto(stock));
+            }
+        }
+
+        // 3️⃣ Itemlarni o‘chirish
+        cartItemRepository.deleteAll(items);
+    }
+
+    @Transactional
+    public void cancelCart(String cartSessionId) {
+        // 1️⃣ CartSession ni topamiz
+        CartSession session = cartSessionRepository.findById(cartSessionId)
+                .orElseThrow(() -> new IllegalArgumentException("Cart session topilmadi"));
+
+        // 2️⃣ Faqat OPEN holatdagilarni bekor qilamiz
+        if (session.getStatus() != CartSession.Status.OPEN) {
+            throw new IllegalStateException("Faqat OPEN holatdagi savatchani bekor qilish mumkin");
+        }
+
+        // 3️⃣ Barcha itemlarni fetch bilan olamiz
+        List<CartItem> items = cartItemRepository.findAllByCartSessionIdWithRelations(cartSessionId);
+
+        for (CartItem item : items) {
+            String purchaseOrderItemId = item.getPurchaseOrderItem().getId();
+            String warehouseId = item.getWarehouse().getId();
+
+            Stock stock = stockRepository.findByPurchaseOrderItemAndWarehouse_Locked(
+                    purchaseOrderItemId, warehouseId, LockModeType.PESSIMISTIC_WRITE
+            ).orElse(null);
+
+            if (stock != null) {
+                BigDecimal newReserved = stock.getReservedQuantity().subtract(item.getQuantity());
+                if (newReserved.compareTo(BigDecimal.ZERO) < 0)
+                    newReserved = BigDecimal.ZERO;
+
+                stock.setReservedQuantity(newReserved);
+                stockRepository.save(stock);
+
+                wsService.broadcastStockUpdate(toDto(stock));
+            }
+        }
+
+        // 4️⃣ Cartning statusini CANCELLED qilib yangilaymiz
+        session.setStatus(CartSession.Status.CANCELLED);
+        cartSessionRepository.save(session);
     }
 
     /** yoradmchi - yangi cartSession chiqrish */

@@ -1,9 +1,12 @@
 package app.ruzi.service.app.stock;
 
+import app.ruzi.entity.app.Item;
+import app.ruzi.entity.app.PurchaseOrderItem;
 import app.ruzi.entity.app.Stock;
 import app.ruzi.repository.app.StockRepository;
 import app.ruzi.service.mappers.StockMapper;
 import app.ruzi.service.payload.app.StockViewDto;
+import jakarta.persistence.criteria.Fetch;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
@@ -26,7 +29,9 @@ public class StockService implements StockServiceImplement {
 
         Specification<Stock> specification = (root, query, cb) -> {
             if (query.getResultType() != Long.class && query.getResultType() != long.class) {
-                root.fetch("purchaseOrderItem", JoinType.LEFT).fetch("item", JoinType.LEFT);
+                Fetch<Stock, PurchaseOrderItem> poiFetch = root.fetch("purchaseOrderItem", JoinType.LEFT);
+                Fetch<PurchaseOrderItem, Item> itemFetch = poiFetch.fetch("item", JoinType.LEFT);
+                itemFetch.fetch("category", JoinType.LEFT); // ✅ yangi qo‘shildi
                 root.fetch("warehouse", JoinType.LEFT);
                 query.distinct(true);
             }
@@ -68,7 +73,6 @@ public class StockService implements StockServiceImplement {
 
         return output;
     }
-
 
     @Override
     public List<Stock> getStockList() {

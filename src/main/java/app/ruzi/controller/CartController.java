@@ -82,5 +82,47 @@ public class CartController {
         return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
     }
 
+    @DeleteMapping("/delete-item/{cartItemId}")
+    @CustomAuthRole(roles = {"ROLE_CART_CREATE"})
+    @MethodInfo(methodName = "delete-cart-item")
+    public ResponseEntity<?> deleteItem(
+            @RequestHeader(value = "Accept-Language", required = false) String langType,
+            @PathVariable("cartItemId") String cartItemId
+    ) {
+        MessageResponse messageResponse = handlerService.handleRequest(
+                () -> cartService.deleteItem(cartItemId),
+                langType
+        );
+        return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
+    }
+
+    @DeleteMapping("/delete-cart/{cartSessionId}")
+    @CustomAuthRole(roles = {"ROLE_CART_CREATE"})
+    @MethodInfo(methodName = "delete-cart-session")
+    public ResponseEntity<?> deleteCart(
+            @RequestHeader(value = "Accept-Language", required = false) String langType,
+            @PathVariable("cartSessionId") String cartSessionId
+    ) {
+        MessageResponse messageResponse = handlerService.handleRequest(
+                () -> cartService.deleteCart(cartSessionId),
+                langType
+        );
+        return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
+    }
+
+    @DeleteMapping("/cancel-cart/{cartSessionId}")
+    @CustomAuthRole(roles = {"ROLE_CART_CREATE"})
+    @MethodInfo(methodName = "cancel-cart-session")
+    public ResponseEntity<?> cancelCart(
+            @RequestHeader(value = "Accept-Language", required = false) String langType,
+            @PathVariable("cartSessionId") String cartSessionId
+    ) {
+        MessageResponse messageResponse = handlerService.handleRequest(
+                () -> cartService.cancelCart(cartSessionId),
+                langType
+        );
+        return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
+    }
+
 }
 
