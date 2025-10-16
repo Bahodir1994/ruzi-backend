@@ -39,4 +39,6 @@ public interface CartItemRepository extends JpaRepository<CartItem, String>, Dat
     """)
     List<CartItem> findAllByCartSessionIdWithRelations(@Param("cartSessionId") String cartSessionId);
 
+    void deleteCartItemsByCartSession_Id(String cartSession_id);
+
 }

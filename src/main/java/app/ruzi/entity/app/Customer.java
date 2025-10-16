@@ -1,7 +1,9 @@
 package app.ruzi.entity.app;
 
 import app.ruzi.configuration.utils.AbstractAuditingEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -23,6 +25,11 @@ public class Customer extends AbstractAuditingEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "client_id", nullable = false)
+    @JsonIgnore
+    private Client client;
 
     /** Tizimdagi unikal mijoz kodi (masalan: CUST-0001) */
     @Column(name = "client_code", length = 50, unique = true, nullable = false)
@@ -83,4 +90,8 @@ public class Customer extends AbstractAuditingEntity {
     /** Aloqa: mijozga tegishli avtomobillar ro‘yxati */
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Vehicle> vehicles;
+
+    public Customer(Long id) {
+        this.id = id;
+    }
 }

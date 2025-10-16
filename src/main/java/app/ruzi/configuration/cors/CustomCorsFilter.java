@@ -33,7 +33,7 @@ public class CustomCorsFilter implements Filter {
         String origin = req.getHeader("Origin");
 
         // Agar ruxsat etilgan bo‘lsa, shuni response ga qo‘yamiz
-        if (origin != null && (ALLOWED_ORIGINS.isEmpty() || ALLOWED_ORIGINS.contains(origin))) {
+        if (origin != null) {
             res.setHeader("Access-Control-Allow-Origin", origin);
         }
 

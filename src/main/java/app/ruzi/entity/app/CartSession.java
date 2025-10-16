@@ -42,9 +42,13 @@ public class CartSession extends AbstractAuditingEntity {
     @JoinColumn(name = "referrer_id")
     private Referrer referrer;
 
+    /** Ixtiyoriy mijoz ma’lumotlari */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
+
     @Column(name = "cart_number", length = 20, unique = true, nullable = false)
     private String cartNumber;
-
 
     /**
      * Kassir foydalanuvchi (Keycloak foydalanuvchisi)
@@ -74,12 +78,6 @@ public class CartSession extends AbstractAuditingEntity {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     private LocalDateTime closedAt;
-
-    /**
-     * Ixtiyoriy mijoz ma’lumotlari
-     */
-    private String customerName;
-    private Long customerId;
 
     /**
      * Umumiy summa va to‘lov ma’lumotlari

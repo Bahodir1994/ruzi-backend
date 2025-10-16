@@ -164,6 +164,7 @@ public class CartService {
         wsService.broadcastStockUpdate(toDto(stock));
     }
 
+    /** cart session boyicha itemlarni olish*/
     @Transactional(readOnly = true)
     public List<CartItemViewDto> getItemsBySessionId(String sessionId) {
         var items = cartItemRepository.findByCartSession_IdOrderByInsTimeDesc(sessionId);
@@ -195,6 +196,7 @@ public class CartService {
         }).toList();
     }
 
+    /** cartItem ni bittalab o'chirish*/
     @Modifying
     @Transactional
     public void deleteItem(String cartItemId) {
@@ -221,6 +223,7 @@ public class CartService {
         wsService.broadcastStockUpdate(toDto(stock));
     }
 
+    /** Savatcha boyicha undagi tovarlarni o'chirish */
     @Modifying
     @Transactional
     public void deleteCart(String cartSessionId) {
@@ -255,9 +258,23 @@ public class CartService {
         }
 
         // 3️⃣ Itemlarni o‘chirish
-        cartItemRepository.deleteAll(items);
+        cartItemRepository.deleteCartItemsByCartSession_Id(cartSessionId);
     }
 
+    /** Savatga Mijoz/Xamkor qoshish */
+    @Transactional
+    public void addCusRef(AddCustomerReferrerToCartDto dto) {
+        CartSession session = cartSessionRepository.findById(dto.cardSessionId())
+                .orElseThrow(() -> new IllegalArgumentException("Session not found"));
+
+        if (dto.type().equals("CUSTOMER")){
+            session.setCustomer(new Customer(dto.id()));
+        }else {
+            session.setCustomer(new Referrer(dto.id()));
+        }
+    }
+
+    /** Savatchani ni bekor qilish */
     @Transactional
     public void cancelCart(String cartSessionId) {
         // 1️⃣ CartSession ni topamiz
@@ -308,7 +325,7 @@ public class CartService {
         return cartSessionRepository.save(session);
     }
 
-    /** yordamchi - cart uchun raqam generatsiyasi */
+    /** yordamchi - savatcha uchun raqam generatsiyasi */
     private String generateCartNumber(){
         LocalDate today = LocalDate.now();
         String datePart = today.format(DateTimeFormatter.ofPattern("yyMMdd"));

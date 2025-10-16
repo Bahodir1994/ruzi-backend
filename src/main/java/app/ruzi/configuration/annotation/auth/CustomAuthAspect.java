@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @Aspect
 @Component
@@ -31,6 +32,13 @@ public class CustomAuthAspect {
         UserJwt userJwt = jwtUtils.extractUserFromToken();
 
         CurrentUserProvider.setCurrentUser(userJwt.getUsername());
+        CurrentUserProvider.setCurrentRoles(
+            userJwt.getRoles()
+                    .stream()
+                    .map(RoleAndPermissionDto::getRoleName)
+                    .filter(Objects::nonNull)
+                    .toList()
+        );
         CurrentTenantProvider.setCurrentClient(userJwt.getClientId());
         CurrentWarehouseProvider.setCurrentWarehouse(userJwt.getWarehouseId());
 

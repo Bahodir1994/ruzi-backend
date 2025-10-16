@@ -19,7 +19,6 @@ import java.math.BigDecimal;
 @Builder
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Referrer extends AbstractAuditingEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(length = 50)

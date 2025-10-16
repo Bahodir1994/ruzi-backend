@@ -6,6 +6,7 @@ import app.ruzi.configuration.messaging.HandlerService;
 import app.ruzi.configuration.messaging.MessageResponse;
 import app.ruzi.service.app.cart.CartService;
 import app.ruzi.service.payload.app.AddCartItemDto;
+import app.ruzi.service.payload.app.AddCustomerReferrerToCartDto;
 import app.ruzi.service.payload.app.CreateCartDto;
 import app.ruzi.service.payload.app.UpdateCartItemDto;
 import jakarta.validation.Valid;
@@ -122,6 +123,20 @@ public class CartController {
                 langType
         );
         return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
+    }
+
+    @PostMapping("/add-customer-referrer")
+    @CustomAuthRole(roles = {"ROLE_CART_CREATE"})
+    @MethodInfo(methodName = "add-item-to-card")
+    public ResponseEntity<?> addItem(
+            @RequestHeader(value = "Accept-Language", required = false) String langType,
+            @RequestBody AddCustomerReferrerToCartDto dto) {
+        MessageResponse messageResponse = handlerService.handleRequest(
+                () -> cartService.addCusRef(dto),
+                langType
+        );
+        return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
+
     }
 
 }
