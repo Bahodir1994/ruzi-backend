@@ -3,6 +3,7 @@ package app.ruzi.entity.app;
 import app.ruzi.configuration.utils.AbstractAuditingEntity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -53,5 +54,9 @@ public class Referrer extends AbstractAuditingEntity {
      */
     @Column(precision = 18, scale = 2)
     private BigDecimal balance = BigDecimal.ZERO;
+
+    public Referrer(@NotBlank String id) {
+        this.id = id;
+    }
 }
 

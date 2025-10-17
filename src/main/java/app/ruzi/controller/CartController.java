@@ -5,10 +5,7 @@ import app.ruzi.configuration.annotation.auth.MethodInfo;
 import app.ruzi.configuration.messaging.HandlerService;
 import app.ruzi.configuration.messaging.MessageResponse;
 import app.ruzi.service.app.cart.CartService;
-import app.ruzi.service.payload.app.AddCartItemDto;
-import app.ruzi.service.payload.app.AddCustomerReferrerToCartDto;
-import app.ruzi.service.payload.app.CreateCartDto;
-import app.ruzi.service.payload.app.UpdateCartItemDto;
+import app.ruzi.service.payload.app.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -125,7 +122,7 @@ public class CartController {
         return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
     }
 
-    @PostMapping("/add-customer-referrer")
+    @PatchMapping("/add-customer-referrer")
     @CustomAuthRole(roles = {"ROLE_CART_CREATE"})
     @MethodInfo(methodName = "add-item-to-card")
     public ResponseEntity<?> addItem(
@@ -137,6 +134,21 @@ public class CartController {
         );
         return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
 
+    }
+
+    @DeleteMapping("/remove-customer-referrer/{cardSessionId}/{type}")
+    @CustomAuthRole(roles = {"ROLE_CART_CREATE"})
+    @MethodInfo(methodName = "delete-cart-item")
+    public ResponseEntity<?> deleteCusRef(
+            @RequestHeader(value = "Accept-Language", required = false) String langType,
+            @PathVariable("cardSessionId") String cardSessionId,
+            @PathVariable("type") String type
+    ) {
+        MessageResponse messageResponse = handlerService.handleRequest(
+                () -> cartService.removeCusRef(new RemoveCustomerReferrerToCartDto(cardSessionId, type)),
+                langType
+        );
+        return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
     }
 
 }

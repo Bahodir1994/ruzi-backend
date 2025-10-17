@@ -270,8 +270,24 @@ public class CartService {
         if (dto.type().equals("CUSTOMER")){
             session.setCustomer(new Customer(dto.id()));
         }else {
-            session.setCustomer(new Referrer(dto.id()));
+            session.setReferrer(new Referrer(dto.id()));
         }
+
+        cartSessionRepository.save(session);
+    }
+
+    /** Savatdan Mijoz/Xamkor larni ochirish */
+    @Transactional
+    public void removeCusRef(RemoveCustomerReferrerToCartDto dto) {
+        CartSession session = cartSessionRepository.findById(dto.cardSessionId())
+                .orElseThrow(() -> new IllegalArgumentException("Session not found"));
+
+        switch (dto.type()) {
+            case "CUSTOMER" -> session.setCustomer(null);
+            case "REFERRER" -> session.setReferrer(null);
+            default -> throw new IllegalArgumentException("type must be CUSTOMER or REFERRER");
+        }
+        cartSessionRepository.save(session);
     }
 
     /** Savatchani ni bekor qilish */
