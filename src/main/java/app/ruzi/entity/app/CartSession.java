@@ -50,6 +50,20 @@ public class CartSession extends AbstractAuditingEntity {
     @Column(name = "cart_number", length = 20, unique = true, nullable = false)
     private String cartNumber;
 
+    /** tarkibiy: CASH/CARD/MIXED */
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private PaymentType paymentType = PaymentType.CASH;
+
+    /** To‘lov holati: UNPAID / PARTIAL / PAID */
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20, nullable = false)
+    private PaymentStatus paymentStatus = PaymentStatus.UNPAID;
+
+    /** Qarz summasi (totalAmount - paidAmount), servisda yangilanadi */
+    @Column(precision = 18, scale = 2)
+    private BigDecimal debtAmount = BigDecimal.ZERO;
+
     /**
      * Kassir foydalanuvchi (Keycloak foydalanuvchisi)
      */
@@ -88,10 +102,6 @@ public class CartSession extends AbstractAuditingEntity {
     @Column(precision = 18, scale = 2)
     private BigDecimal paidAmount = BigDecimal.ZERO;
 
-    @Enumerated(EnumType.STRING)
-    @Column(length = 20)
-    private PaymentType paymentType = PaymentType.CASH;
-
     /**
      * Savatdagi mahsulotlar
      */
@@ -100,6 +110,6 @@ public class CartSession extends AbstractAuditingEntity {
     private List<CartItem> items;
 
     public enum Status {OPEN, CHECKED_OUT, CANCELLED}
-
     public enum PaymentType {CASH, CARD, MIXED}
+    public enum PaymentStatus {UNPAID, PARTIAL, PAID}
 }
