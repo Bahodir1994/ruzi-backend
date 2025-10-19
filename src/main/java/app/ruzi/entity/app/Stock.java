@@ -59,12 +59,21 @@ public class Stock extends AbstractAuditingEntity {
     private BigDecimal quantity = BigDecimal.ZERO;
 
     /**
+     * real qoldiq PCS da
+     */
+    @Column(name = "alt_quantity", precision = 18, scale = 3, nullable = false)
+    private BigDecimal altQuantity = BigDecimal.ZERO;
+
+    /**
      * Savatlarga rezerv qilingan miqdor.
      * Masalan, kassir savatga qo‘shgan, lekin hali to‘lov qilinmagan mahsulot miqdori.
      * Ombordagi real miqdordan ajratilgan, lekin hali chiqim qilinmagan.
      */
     @Column(name = "reserved_quantity", precision = 18, scale = 3, nullable = false)
     private BigDecimal reservedQuantity = BigDecimal.ZERO;
+
+    @Column(name = "reserved_alt_quantity", precision = 18, scale = 3, nullable = false)
+    private BigDecimal reservedAltQuantity = BigDecimal.ZERO;
 
     /**
      * Minimal zaxira (threshold) — ogohlantirish uchun.

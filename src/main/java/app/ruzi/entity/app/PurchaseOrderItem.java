@@ -74,11 +74,17 @@ public class PurchaseOrderItem {
     @Column(name = "quantity", precision = 18, scale = 3, nullable = false)
     private BigDecimal quantity = BigDecimal.ZERO;
 
+    @Column(precision = 10, scale = 3)
+    private BigDecimal conversionRate;
+
     /**
      * O‘lchov birligi kodi (masalan: pcs, kg, l).
      */
     @Column(name = "unit_code", length = 10, nullable = false)
     private String unitCode;
+
+    @Column(name = "alt_unit_code", length = 10, nullable = false)
+    private String altUnitCode;
 
     /**
      * Xarid narxi (bir dona uchun, masalan: 50 000.00 so‘m).
@@ -91,6 +97,9 @@ public class PurchaseOrderItem {
      */
     @Column(name = "sale_price", precision = 15, scale = 2)
     private BigDecimal salePrice;
+
+    @Column(name = "alt_sale_price", precision = 15, scale = 2)
+    private BigDecimal altSalePrice;
 
     /**
      * Umumiy summa (quantity × purchasePrice).

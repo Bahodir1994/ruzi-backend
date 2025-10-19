@@ -66,6 +66,21 @@ public class CartController {
         return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
     }
 
+    @PatchMapping("/update-item-price")
+    @CustomAuthRole(roles = {"ROLE_CART_CREATE"})
+    @MethodInfo(methodName = "update-item-price")
+    public ResponseEntity<?> updateItemPrice(
+            @RequestHeader(value = "Accept-Language", required = false) String langType,
+            @Valid @RequestBody UpdateCartItemPriceDto dto
+    ) {
+        MessageResponse messageResponse = handlerService.handleRequest(
+                () -> cartService.updateItemPrice(dto),
+                langType
+        );
+        return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
+    }
+
+
     @GetMapping("/get-item/{cartSessionId}")
     @CustomAuthRole(roles = {"ROLE_CART_CREATE"})
     @MethodInfo(methodName = "get-item-quantity")

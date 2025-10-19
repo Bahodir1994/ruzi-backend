@@ -164,6 +164,27 @@ public class CartService {
         wsService.broadcastStockUpdate(toDto(stock));
     }
 
+    @Transactional
+    public void updateItemPrice(UpdateCartItemPriceDto dto) {
+        CartItem item = cartItemRepository.findById(dto.cartItemId())
+                .orElseThrow(() -> new IllegalArgumentException("Cart item topilmadi"));
+
+        BigDecimal newPrice = dto.newPrice();
+        BigDecimal discountPercent = dto.discountPercent() != null ? dto.discountPercent() : BigDecimal.ZERO;
+
+        // 🔹 Chegirma summasi
+        BigDecimal discountAmount = newPrice.multiply(discountPercent).divide(BigDecimal.valueOf(100));
+        BigDecimal finalPrice = newPrice.subtract(discountAmount);
+
+        // 🔹 CartItemni yangilaymiz
+        item.setUnitPrice(finalPrice);
+        item.setDiscount(discountAmount);
+        item.setLineTotal(finalPrice.multiply(item.getQuantity()));
+
+        cartItemRepository.save(item);
+    }
+
+
     /** cart session boyicha itemlarni olish*/
     @Transactional(readOnly = true)
     public List<CartItemViewDto> getItemsBySessionId(String sessionId) {
@@ -182,19 +203,34 @@ public class CartService {
         return items.stream().map(item -> {
             var key = item.getPurchaseOrderItem().getId() + "_" + item.getWarehouse().getId();
             var stock = stockMap.get(key);
-            BigDecimal available = stock != null ? stock.getQuantity().subtract(stock.getReservedQuantity()) : BigDecimal.ZERO;
+            BigDecimal available = stock != null
+                    ? stock.getQuantity().subtract(stock.getReservedQuantity())
+                    : BigDecimal.ZERO;
+
+            var poi = item.getPurchaseOrderItem();
+
             return CartItemViewDto.builder()
                     .cartItemId(item.getId())
-                    .purchaseOrderItemId(item.getPurchaseOrderItem().getId())
-                    .itemName(item.getPurchaseOrderItem().getItem().getName())
+                    .purchaseOrderItemId(poi.getId())
+                    .itemName(poi.getItem().getName())
                     .quantity(item.getQuantity())
                     .unitPrice(item.getUnitPrice())
                     .lineTotal(item.getLineTotal())
                     .available(available)
                     .warehouseName(item.getWarehouse().getName())
+
+                    // 🔽 PurchaseOrderItem’dan
+                    .salePrice(poi.getSalePrice())
+                    .purchasePrice(poi.getPurchasePrice())
+                    .minimalSum(poi.getMinimalSum())
+                    .purchaseDiscount(poi.getDiscount()) // xarid paytidagi chegirma
+
+                    // 🔽 CartItem’dan (bizning kassadagi chegirma)
+                    .saleDiscount(item.getDiscount())
                     .build();
         }).toList();
     }
+
 
     /** cartItem ni bittalab o'chirish*/
     @Modifying

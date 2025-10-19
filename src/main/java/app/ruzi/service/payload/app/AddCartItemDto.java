@@ -11,6 +11,7 @@ public record AddCartItemDto(
         @NotBlank String sessionId,
         @NotBlank String purchaseOrderItemId,
         @NotNull BigDecimal quantity,
-        @NotNull BigDecimal unitPrice
+        @NotNull BigDecimal unitPrice,
+        @NotBlank String unitType
 ) {}
 

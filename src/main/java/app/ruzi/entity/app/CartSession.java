@@ -112,4 +112,30 @@ public class CartSession extends AbstractAuditingEntity {
     public enum Status {OPEN, CHECKED_OUT, CANCELLED}
     public enum PaymentType {CASH, CARD, MIXED}
     public enum PaymentStatus {UNPAID, PARTIAL, PAID}
+
+    // --- DEFAULT qiymatlar uchun PrePersist ---
+    @PrePersist
+    protected void onPrePersist() {
+        if (paymentStatus == null) {
+            paymentStatus = PaymentStatus.UNPAID;
+        }
+        if (paymentType == null) {
+            paymentType = PaymentType.CASH;
+        }
+        if (status == null) {
+            status = Status.OPEN;
+        }
+        if (totalAmount == null) {
+            totalAmount = BigDecimal.ZERO;
+        }
+        if (paidAmount == null) {
+            paidAmount = BigDecimal.ZERO;
+        }
+        if (debtAmount == null) {
+            debtAmount = BigDecimal.ZERO;
+        }
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+    }
 }
