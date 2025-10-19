@@ -12,6 +12,6 @@ public record AddCartItemDto(
         @NotBlank String purchaseOrderItemId,
         @NotNull BigDecimal quantity,
         @NotNull BigDecimal unitPrice,
-        @NotBlank String unitType
+        @NotBlank String unitType // "PACK" yoki "PCS"
 ) {}
 

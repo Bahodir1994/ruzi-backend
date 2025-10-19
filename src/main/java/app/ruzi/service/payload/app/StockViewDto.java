@@ -14,8 +14,12 @@ public class StockViewDto {
     private String stockId;
 
     private BigDecimal quantity;
+    private BigDecimal altQuantity;
     private BigDecimal reservedQuantity;
+    private BigDecimal reservedAltQuantity;
     private BigDecimal availableQuantity;
+    private BigDecimal availableAltQuantity;
+    private BigDecimal conversionRate;
 
     private String warehouseId;
     private String warehouseName;
@@ -29,13 +33,16 @@ public class StockViewDto {
     private LocalDate expiryDate;
     private BigDecimal discount;
 
+
     private String itemId;
     private String itemCode;
     private String itemName;
     private String barcode;
     private String unitName;
+    private String altUnitName;
     private String categoryName;
     private String imageUrl;
+
 
     private String clientId;
 }

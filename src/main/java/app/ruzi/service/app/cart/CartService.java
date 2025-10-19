@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -77,81 +78,104 @@ public class CartService {
         PurchaseOrderItem poi = purchaseOrderItemRepository.findById(dto.purchaseOrderItemId())
                 .orElseThrow(() -> new IllegalArgumentException("PurchaseOrderItem not found"));
 
-        /** 🔹 Zaxirani PESSIMISTIC lock bilan olamiz */
+        // 🔒 Zaxirani bloklab olamiz (transaction xavfsizligi uchun)
         Stock stock = stockRepository.findByPurchaseOrderItem_Locked(poi.getId(), LockModeType.PESSIMISTIC_WRITE)
                 .orElseThrow(() -> new IllegalStateException("Stock not found"));
 
-        /** 🔹 Savatda shu tovar bor-yo‘qligini tekshiramiz */
-        Optional<CartItem> existingOpt = cartItemRepository
-                .findByCartSession_IdAndPurchaseOrderItem_Id(session.getId(), poi.getId());
+        // 🔹 Asosiy birlikdagi (masalan PACK) → alt birlikdagi (masalan PCS) konversiya
+        BigDecimal conversionRate = poi.getConversionRate() != null ? poi.getConversionRate() : BigDecimal.ONE;
 
-        BigDecimal quantityToAdd = dto.quantity();
+        // 🔹 DTO dan kelyapti: qancha qo‘shish va qaysi birlikda
+        BigDecimal packQty = BigDecimal.ZERO;
+        BigDecimal pcsQty = BigDecimal.ZERO;
+
+        if ("PACK".equalsIgnoreCase(dto.unitType())) {
+            packQty = dto.quantity();
+        } else if ("PCS".equalsIgnoreCase(dto.unitType())) {
+            pcsQty = dto.quantity();
+        }
+
+        // 🔹 Hisoblaymiz: PACK ekvivalent va ALT ekvivalent
+        BigDecimal totalPackEq = packQty.add(pcsQty.divide(conversionRate, 6, RoundingMode.HALF_UP));
+        BigDecimal totalAltEq = packQty.multiply(conversionRate).add(pcsQty).setScale(6, RoundingMode.HALF_UP);
+
+        // 🔹 Yetarli zaxira bormi (altQuantity bo‘yicha)
+        BigDecimal availableAlt = stock.getAltQuantity().subtract(stock.getReservedAltQuantity());
+        if (totalAltEq.compareTo(availableAlt) > 0) {
+            throw new IllegalStateException("Yetarli zaxira yo‘q (alt birlikda)");
+        }
+
+        // 🔹 Shu mahsulot allaqachon savatda bormi?
+        Optional<CartItem> existingOpt = cartItemRepository.findByCartSession_IdAndPurchaseOrderItem_Id(session.getId(), poi.getId());
 
         if (existingOpt.isPresent()) {
-            /** 🔹 Agar bor bo‘lsa — mavjud miqdorga qo‘shamiz */
+            // 🔸 Agar mavjud bo‘lsa — miqdorini oshiramiz
             CartItem existing = existingOpt.get();
-            BigDecimal newQty = existing.getQuantity().add(quantityToAdd);
-
-            BigDecimal available = stock.getQuantity().subtract(stock.getReservedQuantity());
-            if (quantityToAdd.compareTo(available) > 0)
-                throw new IllegalStateException("Not enough stock available");
-
+            BigDecimal newQty = existing.getQuantity().add(totalPackEq);
             existing.setQuantity(newQty);
             existing.setLineTotal(existing.getUnitPrice().multiply(newQty));
-
-            /** 🔹 Reservedni oshiramiz */
-            stock.setReservedQuantity(stock.getReservedQuantity().add(quantityToAdd));
             cartItemRepository.save(existing);
         } else {
-            /** 🔸 Yangi yozuv yaratamiz */
-            BigDecimal available = stock.getQuantity().subtract(stock.getReservedQuantity());
-            if (quantityToAdd.compareTo(available) > 0)
-                throw new IllegalStateException("Not enough stock available");
+            // 🔸 Yangi yozuv yaratamiz
+            BigDecimal price = "PACK".equalsIgnoreCase(dto.unitType())
+                    ? poi.getSalePrice()
+                    : poi.getAltSalePrice() != null ? poi.getAltSalePrice() : poi.getSalePrice();
 
             CartItem newItem = CartItem.builder()
                     .cartSession(session)
                     .purchaseOrderItem(poi)
-                    .quantity(quantityToAdd)
-                    .unitPrice(poi.getSalePrice())
-                    .lineTotal(poi.getSalePrice().multiply(quantityToAdd))
+                    .quantity(totalPackEq)
+                    .unitPrice(price)
+                    .lineTotal(price.multiply(totalPackEq))
                     .build();
-
             cartItemRepository.save(newItem);
-            stock.setReservedQuantity(stock.getReservedQuantity().add(quantityToAdd));
         }
+
+        // 🔹 Stock rezervni yangilaymiz
+        stock.setReservedQuantity(stock.getReservedQuantity().add(totalPackEq));
+        stock.setReservedAltQuantity(stock.getReservedAltQuantity().add(totalAltEq));
 
         stockRepository.save(stock);
 
-        /** 🔹 WebSocket push — zaxira o‘zgardi */
+        // 🔹 WebSocket orqali yangilanish
         wsService.broadcastStockUpdate(toDto(stock));
     }
 
+
     /** Savatchadagi tovar sonini ozgartirish */
+    @Transactional
     public void updateItemQuantity(UpdateCartItemDto dto) {
         CartItem item = cartItemRepository.findById(dto.cartItemId())
                 .orElseThrow(() -> new IllegalArgumentException("Cart item topilmadi"));
 
+        PurchaseOrderItem poi = item.getPurchaseOrderItem();
         Stock stock = stockRepository.findByPurchaseOrderItem_Locked(
-                        item.getPurchaseOrderItem().getId(), LockModeType.PESSIMISTIC_WRITE)
+                        poi.getId(), LockModeType.PESSIMISTIC_WRITE)
                 .orElseThrow(() -> new IllegalStateException("Stock topilmadi"));
+
+        BigDecimal conversionRate = poi.getConversionRate() != null ? poi.getConversionRate() : BigDecimal.ONE;
 
         BigDecimal oldQty = item.getQuantity();
         BigDecimal newQty = dto.newQuantity();
 
-        // 🔹 Farqni hisoblaymiz
+        // Farqlar (asosiy va alt birlik bo‘yicha)
         BigDecimal diff = newQty.subtract(oldQty);
+        BigDecimal altDiff = diff.multiply(conversionRate).setScale(6, RoundingMode.HALF_UP);
 
-        // 🔹 Agar orttirilsa — zaxiraga tekshiruv
+        // 🔹 Agar orttirilsa
         if (diff.compareTo(BigDecimal.ZERO) > 0) {
-            BigDecimal available = stock.getQuantity().subtract(stock.getReservedQuantity());
-            if (diff.compareTo(available) > 0) {
-                throw new IllegalStateException("Yetarli zaxira yo‘q");
+            BigDecimal availableAlt = stock.getAltQuantity().subtract(stock.getReservedAltQuantity());
+            if (altDiff.compareTo(availableAlt) > 0) {
+                throw new IllegalStateException("Yetarli zaxira yo‘q (alt birlikda)");
             }
+
             stock.setReservedQuantity(stock.getReservedQuantity().add(diff));
+            stock.setReservedAltQuantity(stock.getReservedAltQuantity().add(altDiff));
         }
-        // 🔹 Agar kamaytirilsa — rezervdan chiqaramiz
+        // 🔹 Agar kamaytirilsa
         else if (diff.compareTo(BigDecimal.ZERO) < 0) {
             stock.setReservedQuantity(stock.getReservedQuantity().add(diff)); // diff manfiy
+            stock.setReservedAltQuantity(stock.getReservedAltQuantity().add(altDiff)); // ham manfiy
         }
 
         // 🔹 Yangilash
@@ -163,6 +187,7 @@ public class CartService {
 
         wsService.broadcastStockUpdate(toDto(stock));
     }
+
 
     @Transactional
     public void updateItemPrice(UpdateCartItemPriceDto dto) {
@@ -203,11 +228,15 @@ public class CartService {
         return items.stream().map(item -> {
             var key = item.getPurchaseOrderItem().getId() + "_" + item.getWarehouse().getId();
             var stock = stockMap.get(key);
+            var poi = item.getPurchaseOrderItem();
+
             BigDecimal available = stock != null
                     ? stock.getQuantity().subtract(stock.getReservedQuantity())
                     : BigDecimal.ZERO;
 
-            var poi = item.getPurchaseOrderItem();
+            BigDecimal availableAlt = stock != null
+                    ? stock.getAltQuantity().subtract(stock.getReservedAltQuantity())
+                    : BigDecimal.ZERO;
 
             return CartItemViewDto.builder()
                     .cartItemId(item.getId())
@@ -217,19 +246,23 @@ public class CartService {
                     .unitPrice(item.getUnitPrice())
                     .lineTotal(item.getLineTotal())
                     .available(available)
+                    .availableAlt(availableAlt)                // 🆕 alt birlikdagi mavjud miqdor
+                    .conversionRate(poi.getConversionRate())   // 🆕 1 pack = N pcs
                     .warehouseName(item.getWarehouse().getName())
 
                     // 🔽 PurchaseOrderItem’dan
                     .salePrice(poi.getSalePrice())
+                    .altSalePrice(poi.getAltSalePrice())
                     .purchasePrice(poi.getPurchasePrice())
                     .minimalSum(poi.getMinimalSum())
-                    .purchaseDiscount(poi.getDiscount()) // xarid paytidagi chegirma
+                    .purchaseDiscount(poi.getDiscount())
 
                     // 🔽 CartItem’dan (bizning kassadagi chegirma)
                     .saleDiscount(item.getDiscount())
                     .build();
         }).toList();
     }
+
 
 
     /** cartItem ni bittalab o'chirish*/
@@ -248,6 +281,12 @@ public class CartService {
         BigDecimal reserved = stock.getReservedQuantity().subtract(item.getQuantity());
         if (reserved.compareTo(BigDecimal.ZERO) < 0) reserved = BigDecimal.ZERO;
         stock.setReservedQuantity(reserved);
+
+        BigDecimal reservedAlt = stock.getReservedAltQuantity()
+                .subtract(item.getQuantity().multiply(item.getPurchaseOrderItem().getConversionRate()));
+        if (reservedAlt.compareTo(BigDecimal.ZERO) < 0) reservedAlt = BigDecimal.ZERO;
+        stock.setReservedAltQuantity(reservedAlt);
+
 
         // 🔹 Saqlash
         stockRepository.save(stock);
@@ -285,6 +324,12 @@ public class CartService {
                 BigDecimal newReserved = stock.getReservedQuantity().subtract(item.getQuantity());
                 if (newReserved.compareTo(BigDecimal.ZERO) < 0)
                     newReserved = BigDecimal.ZERO;
+
+                BigDecimal reservedAlt = stock.getReservedAltQuantity()
+                        .subtract(item.getQuantity().multiply(item.getPurchaseOrderItem().getConversionRate()));
+                if (reservedAlt.compareTo(BigDecimal.ZERO) < 0) reservedAlt = BigDecimal.ZERO;
+                stock.setReservedAltQuantity(reservedAlt);
+
 
                 stock.setReservedQuantity(newReserved);
                 stockRepository.save(stock);
@@ -354,6 +399,12 @@ public class CartService {
                 if (newReserved.compareTo(BigDecimal.ZERO) < 0)
                     newReserved = BigDecimal.ZERO;
 
+                BigDecimal reservedAlt = stock.getReservedAltQuantity()
+                        .subtract(item.getQuantity().multiply(item.getPurchaseOrderItem().getConversionRate()));
+                if (reservedAlt.compareTo(BigDecimal.ZERO) < 0) reservedAlt = BigDecimal.ZERO;
+                stock.setReservedAltQuantity(reservedAlt);
+
+
                 stock.setReservedQuantity(newReserved);
                 stockRepository.save(stock);
 
@@ -396,16 +447,27 @@ public class CartService {
     }
 
     /** yordamchi - natijani dto ga set qilish */
+    /** yordamchi - natijani dto ga set qilish */
     private StockViewDto toDto(Stock stock) {
         BigDecimal available = stock.getQuantity().subtract(stock.getReservedQuantity());
+        BigDecimal availableAlt = stock.getAltQuantity().subtract(stock.getReservedAltQuantity());
+
         return StockViewDto.builder()
                 .stockId(stock.getId())
                 .quantity(stock.getQuantity())
                 .reservedQuantity(stock.getReservedQuantity())
                 .availableQuantity(available)
+
+                .altQuantity(stock.getAltQuantity())
+                .reservedAltQuantity(stock.getReservedAltQuantity())
+                .availableAltQuantity(availableAlt)
+                .conversionRate(stock.getPurchaseOrderItem().getConversionRate()) // 🆕 qo‘shildi
+
                 .itemName(stock.getPurchaseOrderItem().getItem().getName())
                 .warehouseName(stock.getWarehouse().getName())
                 .build();
     }
+
+
 }
 

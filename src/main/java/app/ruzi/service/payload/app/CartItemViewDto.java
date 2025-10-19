@@ -13,10 +13,13 @@ public record CartItemViewDto(
         BigDecimal unitPrice,
         BigDecimal lineTotal,
         BigDecimal available,
+        BigDecimal availableAlt,
+        BigDecimal conversionRate,
         String warehouseName,
 
         // --- 🔽 PurchaseOrderItem'dan ---
         BigDecimal salePrice,        // Asl sotuv narxi
+        BigDecimal altSalePrice,        // Asl sotuv narxi birlikda
         BigDecimal minimalSum,       // Minimal sotuv narxi
         BigDecimal purchasePrice,    // Xarid narxi
         BigDecimal purchaseDiscount, // Xarid paytidagi chegirma (supplier)

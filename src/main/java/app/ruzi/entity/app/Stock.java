@@ -96,4 +96,14 @@ public class Stock extends AbstractAuditingEntity {
         BigDecimal r = (reservedQuantity != null) ? reservedQuantity : BigDecimal.ZERO;
         return q.subtract(r);
     }
+
+    @PrePersist
+    protected void onPrePersist() {
+        if (altQuantity == null) {
+            altQuantity = BigDecimal.ZERO;
+        }
+        if (reservedAltQuantity == null) {
+            reservedAltQuantity = BigDecimal.ZERO;
+        }
+    }
 }

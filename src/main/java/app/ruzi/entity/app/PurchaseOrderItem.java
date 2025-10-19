@@ -134,4 +134,12 @@ public class PurchaseOrderItem {
     public PurchaseOrderItem(String purchaseOrderItemId) {
         this.id = purchaseOrderItemId;
     }
+
+    @PrePersist
+    protected void onPrePersist() {
+        if (conversionRate == null) {
+            conversionRate = BigDecimal.ONE;
+        }
+    }
 }
+

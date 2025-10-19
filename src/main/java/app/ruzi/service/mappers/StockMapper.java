@@ -3,12 +3,10 @@ package app.ruzi.service.mappers;
 import app.ruzi.configuration.utils.CommonMapperUtils;
 import app.ruzi.entity.app.Stock;
 import app.ruzi.service.payload.app.StockViewDto;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.NullValuePropertyMappingStrategy;
-import org.mapstruct.ReportingPolicy;
+import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Mapper(
@@ -23,13 +21,16 @@ public interface StockMapper {
     @Mapping(target = "warehouseId", source = "warehouse.id")
     @Mapping(target = "warehouseName", source = "warehouse.name")
     @Mapping(target = "warehouseCode", source = "warehouse.id")
+
     @Mapping(target = "purchaseOrderItemId", source = "purchaseOrderItem.id")
     @Mapping(target = "itemId", source = "purchaseOrderItem.item.id")
     @Mapping(target = "itemCode", source = "purchaseOrderItem.item.code")
     @Mapping(target = "itemName", source = "purchaseOrderItem.item.name")
     @Mapping(target = "barcode", source = "purchaseOrderItem.item.barcode")
     @Mapping(target = "unitName", source = "purchaseOrderItem.unitCode")
+    @Mapping(target = "altUnitName", source = "purchaseOrderItem.altUnitCode") // 🆕 qo‘shildi
     @Mapping(target = "categoryName", source = "purchaseOrderItem.item.category.code")
+
     @Mapping(target = "salePrice", source = "purchaseOrderItem.salePrice")
     @Mapping(target = "minimalSum", source = "purchaseOrderItem.minimalSum")
     @Mapping(target = "purchasePrice", source = "purchaseOrderItem.purchasePrice")
@@ -38,7 +39,20 @@ public interface StockMapper {
     @Mapping(target = "discount", source = "purchaseOrderItem.discount")
     @Mapping(target = "imageUrl", source = "purchaseOrderItem.item.primaryImageUrl")
     @Mapping(target = "clientId", source = "client.id")
+
+    // 🆕 ALT birliklar uchun:
+    @Mapping(target = "altQuantity", source = "altQuantity")
+    @Mapping(target = "reservedAltQuantity", source = "reservedAltQuantity")
+    @Mapping(target = "availableAltQuantity", expression = "java(calcAvailableAlt(entity))")
+    @Mapping(target = "conversionRate", source = "purchaseOrderItem.conversionRate")
+
     StockViewDto toDto(Stock entity);
 
     List<StockViewDto> toDtoList(List<Stock> stockList);
+
+    default BigDecimal calcAvailableAlt(Stock entity) {
+        if (entity.getAltQuantity() == null || entity.getReservedAltQuantity() == null)
+            return BigDecimal.ZERO;
+        return entity.getAltQuantity().subtract(entity.getReservedAltQuantity());
+    }
 }
