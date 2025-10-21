@@ -61,7 +61,9 @@ public class Stock extends AbstractAuditingEntity {
     /**
      * real qoldiq PCS da
      */
-    @Column(name = "alt_quantity", precision = 18, scale = 3, nullable = false)
+    @Column(name = "alt_quantity", precision = 18, scale = 3
+//            , nullable = false
+    )
     private BigDecimal altQuantity = BigDecimal.ZERO;
 
     /**
@@ -72,7 +74,9 @@ public class Stock extends AbstractAuditingEntity {
     @Column(name = "reserved_quantity", precision = 18, scale = 3, nullable = false)
     private BigDecimal reservedQuantity = BigDecimal.ZERO;
 
-    @Column(name = "reserved_alt_quantity", precision = 18, scale = 3, nullable = false)
+    @Column(name = "reserved_alt_quantity", precision = 18, scale = 3
+//            , nullable = false
+    )
     private BigDecimal reservedAltQuantity = BigDecimal.ZERO;
 
     /**

@@ -31,7 +31,7 @@ public interface ItemMapper {
     @Mapping(target = "brand", source = "brand", qualifiedByName = "stringOrBlankToString")
     @Mapping(target = "unit", source = "unit", qualifiedByName = "stringOrBlankToString")
     @Mapping(target = "description", source = "description", qualifiedByName = "stringOrBlankToString")
-    @Mapping(target = "client", ignore = true) // token orqali set qilinadi
+    @Mapping(target = "client", ignore = true)
     Item toEntity(ItemRequestDto dto);
 
     /*****************************************************
@@ -45,12 +45,4 @@ public interface ItemMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     Item partialUpdate(ItemDto dto, @MappingTarget Item entity);
 
-    /*****************************************************
-     * 🧩 Qo‘shimcha converterlar (custom @Named)
-     *****************************************************/
-    @Named("stringToCategory")
-    default Category stringToCategory(String categoryId) {
-        if (categoryId == null || categoryId.isBlank()) return null;
-        return Category.builder().id(categoryId.trim()).build();
-    }
 }

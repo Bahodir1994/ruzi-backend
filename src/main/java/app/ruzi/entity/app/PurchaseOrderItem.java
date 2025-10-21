@@ -83,7 +83,9 @@ public class PurchaseOrderItem {
     @Column(name = "unit_code", length = 10, nullable = false)
     private String unitCode;
 
-    @Column(name = "alt_unit_code", length = 10, nullable = false)
+    @Column(name = "alt_unit_code", length = 10
+//            , nullable = false
+    )
     private String altUnitCode;
 
     /**

@@ -57,7 +57,9 @@ public class CartSession extends AbstractAuditingEntity {
 
     /** To‘lov holati: UNPAID / PARTIAL / PAID */
     @Enumerated(EnumType.STRING)
-    @Column(length = 20, nullable = false)
+    @Column(length = 20
+//            , nullable = false
+    )
     private PaymentStatus paymentStatus = PaymentStatus.UNPAID;
 
     /** Qarz summasi (totalAmount - paidAmount), servisda yangilanadi */

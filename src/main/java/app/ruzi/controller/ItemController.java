@@ -25,7 +25,7 @@ public class ItemController {
     private final ItemService itemService;
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ROLE_ITEM_CREATE', 'MANAGER', 'CASHIER')")
+    @PreAuthorize("hasRole('ROLE_ITEM_CREATE')")
     public ResponseEntity<Object> create(
             @RequestParam("Accept-language") String langType,
             @Valid @RequestBody ItemRequestDto itemRequestDto,

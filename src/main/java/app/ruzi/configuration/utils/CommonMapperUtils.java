@@ -99,11 +99,9 @@ public class CommonMapperUtils {
     // ==============================================================
 
     @Named("stringToCategory")
-    public static Category stringToCategory(String id) {
-        if (id == null || id.isBlank()) return null;
-        Category category = new Category();
-        category.setId(id.trim());
-        return category;
+    public static Category stringToCategory(String categoryId) {
+        if (categoryId == null || categoryId.isBlank()) return null;
+        return Category.builder().id(categoryId.trim()).build();
     }
 
     @Named("stringToWarehouse")
