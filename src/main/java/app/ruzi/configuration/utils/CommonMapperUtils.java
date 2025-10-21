@@ -1,5 +1,8 @@
 package app.ruzi.configuration.utils;
 
+import app.ruzi.entity.app.Category;
+import app.ruzi.entity.app.Warehouse;
+import app.ruzi.entity.app.Client;
 import org.mapstruct.Named;
 import org.springframework.stereotype.Component;
 
@@ -7,16 +10,16 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
 public class CommonMapperUtils {
 
-    // ----------------- Helpers -----------------
+    // ==============================================================
+    // 🔹 1. Basic converters (String → Number / Date / Boolean / etc.)
+    // ==============================================================
 
     @Named("stringToDouble")
     public static Double stringToDouble(String doubles) {
@@ -42,10 +45,9 @@ public class CommonMapperUtils {
     public static Timestamp stringToTimestamp(String value) {
         if (value == null || value.isBlank()) return null;
         try {
-            // format: "2025-08-12 14:30:00"
             return Timestamp.valueOf(value.trim());
         } catch (IllegalArgumentException e) {
-            return null; // noto‘g‘ri format bo‘lsa null qaytaradi
+            return null;
         }
     }
 
@@ -81,14 +83,10 @@ public class CommonMapperUtils {
         return value.trim();
     }
 
-    @Named("stringToBigDecimalSafe")
-    public static BigDecimal stringToBigDecimalSafe(String value) {
-        if (value == null || value.isBlank()) return null;
-        try {
-            return new BigDecimal(value.trim());
-        } catch (NumberFormatException e) {
-            return null;
-        }
+    @Named("stringToBoolean")
+    public static Boolean stringToBoolean(String value) {
+        if (value == null) return null;
+        return Boolean.parseBoolean(value.trim().toLowerCase());
     }
 
     @Named("defaultZero")
@@ -96,16 +94,38 @@ public class CommonMapperUtils {
         return value == null ? 0 : value;
     }
 
-    @Named("stringToBoolean")
-    public static Boolean stringToBoolean(String value) {
-        if (value == null) return null; // null kelganda null qaytaradi
-        return Boolean.parseBoolean(value.trim().toLowerCase());
+    // ==============================================================
+    // 🔹 2. Entity reference converters (String ID → Entity Object)
+    // ==============================================================
+
+    @Named("stringToCategory")
+    public static Category stringToCategory(String id) {
+        if (id == null || id.isBlank()) return null;
+        Category category = new Category();
+        category.setId(id.trim());
+        return category;
     }
 
+    @Named("stringToWarehouse")
+    public static Warehouse stringToWarehouse(String id) {
+        if (id == null || id.isBlank()) return null;
+        Warehouse warehouse = new Warehouse();
+        warehouse.setId(id.trim());
+        return warehouse;
+    }
 
-    /**
-     * Generic List filter: isDeleted = 0 bo‘lganlarni qoldiradi
-     */
+    @Named("stringToClient")
+    public static Client stringToClient(String id) {
+        if (id == null || id.isBlank()) return null;
+        Client client = new Client();
+        client.setId(id.trim());
+        return client;
+    }
+
+    // ==============================================================
+    // 🔹 3. Generic filters for List/Set (isDeleted = 0)
+    // ==============================================================
+
     @Named("filterDeletedList")
     public static <E, D> List<D> filterDeletedList(
             List<E> entities,
@@ -119,9 +139,6 @@ public class CommonMapperUtils {
                 .toList();
     }
 
-    /**
-     * Generic Set filter: isDeleted = 0 bo‘lganlarni qoldiradi
-     */
     @Named("filterDeletedSet")
     public static <E, D> Set<D> filterDeletedSet(
             Set<E> entities,

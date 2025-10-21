@@ -3,6 +3,7 @@ package app.ruzi.service.app.item;
 import app.ruzi.entity.app.Item;
 import app.ruzi.repository.app.ItemRepository;
 import app.ruzi.service.mappers.ItemMapper;
+import app.ruzi.service.payload.ItemRequestDto;
 import app.ruzi.service.payload.app.ItemDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
@@ -20,8 +21,8 @@ public class ItemService implements ItemServiceImplement {
 
     @Override
     @Transactional
-    public void create(ItemDto itemDto) {
-        Item productEntity = ItemMapper.INSTANCE.toEntity(itemDto);
+    public void create(ItemRequestDto itemRequestDto) {
+        Item productEntity = ItemMapper.INSTANCE.toEntity(itemRequestDto);
         itemRepository.save(productEntity);
     }
 

@@ -4,6 +4,7 @@ import app.ruzi.configuration.messaging.HandlerService;
 import app.ruzi.configuration.messaging.MessageResponse;
 import app.ruzi.entity.app.Item;
 import app.ruzi.service.app.item.ItemService;
+import app.ruzi.service.payload.ItemRequestDto;
 import app.ruzi.service.payload.app.ItemDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,14 +25,15 @@ public class ItemController {
     private final ItemService itemService;
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ROLE_ITEM_CREATE', 'MANAGER', 'CASHIER')")
     public ResponseEntity<Object> create(
             @RequestParam("Accept-language") String langType,
-            @Valid @RequestBody ItemDto itemDto,
+            @Valid @RequestBody ItemRequestDto itemRequestDto,
             BindingResult bindingResult
     ) {
 
         MessageResponse messageResponse = handlerService.handleRequest(
-                () -> itemService.create(itemDto),
+                () -> itemService.create(itemRequestDto),
                 bindingResult,
                 langType
         );
@@ -44,21 +47,5 @@ public class ItemController {
         DataTablesOutput<Item> privilegeDataTablesOutput = itemService.readTableProduct(dataTablesInput);
         return new ResponseEntity<>(privilegeDataTablesOutput, HttpStatus.OK);
     }
-
-//
-//    @GetMapping
-//    public ResponseEntity<List<ProductDto>> getAll() { return ResponseEntity.ok().build(); }
-//
-//    @GetMapping("/{id}")
-//    public ResponseEntity<ProductDto> getById(@PathVariable Long id) { return ResponseEntity.ok().build(); }
-//
-//    @PostMapping
-//    public ResponseEntity<ProductDto> create(@RequestBody ProductDto dto) { return ResponseEntity.ok().build(); }
-//
-//    @PutMapping("/{id}")
-//    public ResponseEntity<ProductDto> update(@PathVariable Long id, @RequestBody ProductDto dto) { return ResponseEntity.ok().build(); }
-//
-//    @DeleteMapping("/{id}")
-//    public ResponseEntity<Void> delete(@PathVariable Long id) { return ResponseEntity.noContent().build(); }
 }
 
