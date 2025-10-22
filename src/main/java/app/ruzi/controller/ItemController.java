@@ -25,9 +25,9 @@ public class ItemController {
     private final ItemService itemService;
 
     @PostMapping
-    @PreAuthorize("hasRole('ROLE_ITEM_CREATE')")
+    @PreAuthorize("hasAuthority('ROLE_ITEM_CREATE')")
     public ResponseEntity<Object> create(
-            @RequestParam("Accept-language") String langType,
+            @RequestHeader(value = "Accept-Language", required = false) String langType,
             @Valid @RequestBody ItemRequestDto itemRequestDto,
             BindingResult bindingResult
     ) {
@@ -43,6 +43,7 @@ public class ItemController {
 
 
     @PostMapping("/data-table-main")
+    @PreAuthorize("hasAuthority('ROLE_ITEM_READ')")
     public ResponseEntity<Object> read_table_data(@RequestBody @Valid DataTablesInput dataTablesInput) {
         DataTablesOutput<Item> privilegeDataTablesOutput = itemService.readTableProduct(dataTablesInput);
         return new ResponseEntity<>(privilegeDataTablesOutput, HttpStatus.OK);
