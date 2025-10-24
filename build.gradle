@@ -37,6 +37,7 @@ dependencies {
     implementation 'com.nimbusds:nimbus-jose-jwt:9.47'
     implementation 'com.github.darrachequesne:spring-data-jpa-datatables:6.0.1'
     implementation 'org.mapstruct:mapstruct:1.6.3'
+    implementation 'io.minio:minio:8.5.12'
 
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'org.postgresql:postgresql'
