@@ -7,5 +7,6 @@ import lombok.Builder;
 public record RemoveCustomerReferrerToCartDto(
         @NotBlank String cardSessionId,
         @NotBlank String type //CUSTOMER / REFERRER
-) {}
+) {
+}
 

@@ -16,53 +16,77 @@ import lombok.*;
 @Builder
 public class Vehicle extends AbstractAuditingEntity {
 
-    /** Birlamchi identifikator (avto inkrement) */
+    /**
+     * Birlamchi identifikator (avto inkrement)
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /** Aloqador mijoz (Customer) */
+    /**
+     * Aloqador mijoz (Customer)
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
-    /** Davlat raqami (masalan: 01A123BB) */
+    /**
+     * Davlat raqami (masalan: 01A123BB)
+     */
     @Column(name = "plate_number", length = 20, nullable = false)
     private String plateNumber;
 
-    /** VIN kodi (kuzov raqami) */
+    /**
+     * VIN kodi (kuzov raqami)
+     */
     @Column(name = "vin_code", length = 50)
     private String vinCode;
 
-    /** Avtomobil brendi (Toyota, Chevrolet, Hyundai ...) */
+    /**
+     * Avtomobil brendi (Toyota, Chevrolet, Hyundai ...)
+     */
     @Column(name = "brand", length = 120)
     private String brand;
 
-    /** Model nomi (Camry, Cobalt, Elantra ...) */
+    /**
+     * Model nomi (Camry, Cobalt, Elantra ...)
+     */
     @Column(name = "model", length = 120)
     private String model;
 
-    /** Rang nomi */
+    /**
+     * Rang nomi
+     */
     @Column(name = "color", length = 60)
     private String color;
 
-    /** Ishlab chiqarilgan yil */
+    /**
+     * Ishlab chiqarilgan yil
+     */
     @Column(name = "year_made")
     private Integer yearMade;
 
-    /** Dvigatel raqami */
+    /**
+     * Dvigatel raqami
+     */
     @Column(name = "engine_number", length = 100)
     private String engineNumber;
 
-    /** Bosib o‘tilgan masofa (km) */
+    /**
+     * Bosib o‘tilgan masofa (km)
+     */
     @Column(name = "mileage")
     private Double mileage;
 
-    /** So‘nggi texnik xizmat sanasi */
+    /**
+     * So‘nggi texnik xizmat sanasi
+     */
     @Column(name = "last_service_at")
     private java.time.LocalDateTime lastServiceAt;
 
-    /** Izoh yoki qo‘shimcha ma’lumot */
+    /**
+     * Izoh yoki qo‘shimcha ma’lumot
+     */
     @Column(name = "note", columnDefinition = "TEXT")
     private String note;
 }

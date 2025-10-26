@@ -1,6 +1,8 @@
 package app.ruzi.service.payload;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 
 /**
@@ -62,4 +64,5 @@ public record ItemRequestDto(
         /** Tavsif — ixtiyoriy */
         @Size(max = 600, message = "Tavsif uzunligi 600 belgidan oshmasligi kerak")
         String description
-) {}
+) {
+}

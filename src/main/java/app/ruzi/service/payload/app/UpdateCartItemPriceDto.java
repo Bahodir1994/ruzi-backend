@@ -11,4 +11,5 @@ public record UpdateCartItemPriceDto(
         @NotBlank String cartItemId,
         @NotNull BigDecimal newPrice,
         BigDecimal discountPercent
-) {}
+) {
+}

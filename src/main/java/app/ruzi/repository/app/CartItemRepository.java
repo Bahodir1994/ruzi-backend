@@ -1,7 +1,6 @@
 package app.ruzi.repository.app;
 
 import app.ruzi.entity.app.CartItem;
-import com.querydsl.core.Fetchable;
 import org.springframework.data.jpa.datatables.repository.DataTablesRepository;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -31,12 +30,12 @@ public interface CartItemRepository extends JpaRepository<CartItem, String>, Dat
     Optional<CartItem> findById(String id);
 
     @Query("""
-        SELECT ci FROM CartItem ci
-        JOIN FETCH ci.purchaseOrderItem poi
-        JOIN FETCH poi.item it
-        JOIN FETCH ci.warehouse w
-        WHERE ci.cartSession.id = :cartSessionId
-    """)
+                SELECT ci FROM CartItem ci
+                JOIN FETCH ci.purchaseOrderItem poi
+                JOIN FETCH poi.item it
+                JOIN FETCH ci.warehouse w
+                WHERE ci.cartSession.id = :cartSessionId
+            """)
     List<CartItem> findAllByCartSessionIdWithRelations(@Param("cartSessionId") String cartSessionId);
 
     void deleteCartItemsByCartSession_Id(String cartSession_id);

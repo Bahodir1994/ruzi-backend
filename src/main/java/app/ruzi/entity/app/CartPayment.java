@@ -3,6 +3,7 @@ package app.ruzi.entity.app;
 import app.ruzi.configuration.utils.AbstractAuditingEntity;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -12,24 +13,34 @@ import java.time.LocalDateTime;
                 @Index(name = "idx_cart_payment_cart", columnList = "cart_id"),
                 @Index(name = "idx_cart_payment_client", columnList = "client_id")
         })
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class CartPayment extends AbstractAuditingEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    /** Multi-tenant */
+    /**
+     * Multi-tenant
+     */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;
 
-    /** Qaysi chek bo‘yicha to‘lov */
+    /**
+     * Qaysi chek bo‘yicha to‘lov
+     */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "cart_id", nullable = false)
     private CartSession cartSession;
 
-    /** Mijoz (qarz to‘lovlarida qulay) */
+    /**
+     * Mijoz (qarz to‘lovlarida qulay)
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id")
     private Customer customer;
@@ -41,12 +52,16 @@ public class CartPayment extends AbstractAuditingEntity {
     @Column(precision = 18, scale = 2, nullable = false)
     private BigDecimal amount;
 
-    /** Terminal/kvitinga havola (ixtiyoriy) */
+    /**
+     * Terminal/kvitinga havola (ixtiyoriy)
+     */
     @Column(length = 100)
     private String externalTxnId;
 
-    /** Kiritilgan vaqt (default CURRENT_TIMESTAMP ham bo‘lishi mumkin) */
+    /**
+     * Kiritilgan vaqt (default CURRENT_TIMESTAMP ham bo‘lishi mumkin)
+     */
     private LocalDateTime paidAt = LocalDateTime.now();
 
-    public enum Method { CASH, CARD }
+    public enum Method {CASH, CARD}
 }

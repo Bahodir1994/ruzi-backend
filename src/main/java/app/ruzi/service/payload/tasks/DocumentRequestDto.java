@@ -1,6 +1,5 @@
 package app.ruzi.service.payload.tasks;
 
-import app.ruzi.configuration.annotation.validfile.ValidFile;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,17 +9,15 @@ import org.springframework.util.DigestUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
 public class DocumentRequestDto {
-    private String parentId;
+    private List<String> idList;
 
-    private String type;
-
-    @ValidFile(minSize = 0, maxSize = 5, format = {"pdf", "xlsx"})
     @Nullable
     private MultipartFile multipartFile;
 

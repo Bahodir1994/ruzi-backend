@@ -15,8 +15,6 @@ import java.util.Date;
 
 @Entity
 @Table(name = "document", schema = "ruzi")
-@SQLRestriction("is_deleted <> true") // Postgres’da boolean sifatida
-@SQLDelete(sql = "update ruzi.document set is_deleted = true where id = ?")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter

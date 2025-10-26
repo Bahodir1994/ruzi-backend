@@ -30,14 +30,14 @@ public interface StockRepository extends JpaRepository<Stock, String>, DataTable
 
     Optional<Stock> findByPurchaseOrderItemAndWarehouse(PurchaseOrderItem poi, Warehouse warehouse);
 
-    List<Stock>  findAllByPurchaseOrderItemIdInAndWarehouseIdIn(List<String> poiIds, List<String> whIds);
+    List<Stock> findAllByPurchaseOrderItemIdInAndWarehouseIdIn(List<String> poiIds, List<String> whIds);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
-        SELECT s FROM Stock s
-        WHERE s.purchaseOrderItem.id = :purchaseOrderItemId
-          AND s.warehouse.id = :warehouseId
-    """)
+                SELECT s FROM Stock s
+                WHERE s.purchaseOrderItem.id = :purchaseOrderItemId
+                  AND s.warehouse.id = :warehouseId
+            """)
     Optional<Stock> findByPurchaseOrderItemAndWarehouse_Locked(
             @Param("purchaseOrderItemId") String purchaseOrderItemId,
             @Param("warehouseId") String warehouseId,

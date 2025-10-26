@@ -2,6 +2,7 @@ package app.ruzi.repository.app;
 
 import app.ruzi.entity.app.CartPayment;
 import org.springframework.data.jpa.repository.JpaRepository;
+
 import java.util.List;
 
 public interface CartPaymentRepository extends JpaRepository<CartPayment, String> {

@@ -1,7 +1,6 @@
 package app.ruzi.controller;
 
 import app.ruzi.configuration.annotation.auth.MethodInfo;
-import app.ruzi.entity.app.Stock;
 import app.ruzi.service.app.stock.StockService;
 import app.ruzi.service.payload.app.StockViewDto;
 import jakarta.validation.Valid;

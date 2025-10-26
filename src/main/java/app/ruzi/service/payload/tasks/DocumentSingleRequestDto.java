@@ -13,10 +13,8 @@ import java.util.List;
 @Setter
 public class DocumentSingleRequestDto {
     private String parentId;
-
+    private String name;
     private String id;
-
     private List<String> idList;
-
     private String type;
 }

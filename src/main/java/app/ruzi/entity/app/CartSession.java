@@ -3,7 +3,6 @@ package app.ruzi.entity.app;
 import app.ruzi.configuration.utils.AbstractAuditingEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -42,7 +41,9 @@ public class CartSession extends AbstractAuditingEntity {
     @JoinColumn(name = "referrer_id")
     private Referrer referrer;
 
-    /** Ixtiyoriy mijoz ma’lumotlari */
+    /**
+     * Ixtiyoriy mijoz ma’lumotlari
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id")
     private Customer customer;
@@ -50,19 +51,25 @@ public class CartSession extends AbstractAuditingEntity {
     @Column(name = "cart_number", length = 20, unique = true, nullable = false)
     private String cartNumber;
 
-    /** tarkibiy: CASH/CARD/MIXED */
+    /**
+     * tarkibiy: CASH/CARD/MIXED
+     */
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     private PaymentType paymentType = PaymentType.CASH;
 
-    /** To‘lov holati: UNPAID / PARTIAL / PAID */
+    /**
+     * To‘lov holati: UNPAID / PARTIAL / PAID
+     */
     @Enumerated(EnumType.STRING)
     @Column(length = 20
 //            , nullable = false
     )
     private PaymentStatus paymentStatus = PaymentStatus.UNPAID;
 
-    /** Qarz summasi (totalAmount - paidAmount), servisda yangilanadi */
+    /**
+     * Qarz summasi (totalAmount - paidAmount), servisda yangilanadi
+     */
     @Column(precision = 18, scale = 2)
     private BigDecimal debtAmount = BigDecimal.ZERO;
 
@@ -112,7 +119,9 @@ public class CartSession extends AbstractAuditingEntity {
     private List<CartItem> items;
 
     public enum Status {OPEN, CHECKED_OUT, CANCELLED}
+
     public enum PaymentType {CASH, CARD, MIXED}
+
     public enum PaymentStatus {UNPAID, PARTIAL, PAID}
 
     // --- DEFAULT qiymatlar uchun PrePersist ---

@@ -15,6 +15,8 @@ public class CustomAuditingEntityListener {
 
             // 🔹 1. CLIENT ni avtomatik set qilish
             String clientId = CurrentTenantProvider.getCurrentClient();
+            System.out.println("🧩 CurrentTenantProvider → clientId = " + clientId);
+
             if (clientId != null) {
                 setEntityFieldIfNull(entity, "client", new Client(clientId));
             }

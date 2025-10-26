@@ -5,12 +5,15 @@ import app.ruzi.configuration.messaging.HandlerService;
 import app.ruzi.configuration.messaging.MessageResponse;
 import app.ruzi.entity.app.Category;
 import app.ruzi.service.app.category.CategoryService;
+import app.ruzi.service.payload.app.CategoryDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -38,6 +41,23 @@ public class CategoryController {
                 categoryService::getCategoryList,
                 langType
         );
+        return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
+    }
+
+    @PostMapping("/create")
+    @PreAuthorize("hasAuthority('ROLE_CAT_CREATE')")
+    @MethodInfo(methodName = "create-category")
+    public ResponseEntity<Object> create(
+            @RequestHeader(value = "Accept-Language", required = false) String langType,
+            @RequestBody @Valid CategoryDto categoryDto,
+            BindingResult bindingResult
+    ) {
+        MessageResponse messageResponse = handlerService.handleRequest(
+                () -> categoryService.create(categoryDto),
+                bindingResult,
+                langType
+        );
+
         return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
     }
 }

@@ -37,7 +37,9 @@ public class CartService {
     private final StockRepository stockRepository;
     private final PurchaseOrderItemRepository purchaseOrderItemRepository;
 
-    /** 1. Savatcha yaratish */
+    /**
+     * 1. Savatcha yaratish
+     */
     public CartSession createSession(CreateCartDto createCartDto) {
         UserJwt userJwt = new UserJwt();
         try {
@@ -69,7 +71,9 @@ public class CartService {
         ).orElseGet(() -> createNewSession(finalUserJwt));
     }
 
-    /** 2. Savatchaga tovar qo‘shish */
+    /**
+     * 2. Savatchaga tovar qo‘shish
+     */
     @Transactional
     public void addItem(AddCartItemDto dto) {
         CartSession session = cartSessionRepository.findById(dto.sessionId())
@@ -142,7 +146,9 @@ public class CartService {
     }
 
 
-    /** Savatchadagi tovar sonini ozgartirish */
+    /**
+     * Savatchadagi tovar sonini ozgartirish
+     */
     @Transactional
     public void updateItemQuantity(UpdateCartItemDto dto) {
         CartItem item = cartItemRepository.findById(dto.cartItemId())
@@ -210,7 +216,9 @@ public class CartService {
     }
 
 
-    /** cart session boyicha itemlarni olish*/
+    /**
+     * cart session boyicha itemlarni olish
+     */
     @Transactional(readOnly = true)
     public List<CartItemViewDto> getItemsBySessionId(String sessionId) {
         var items = cartItemRepository.findByCartSession_IdOrderByInsTimeDesc(sessionId);
@@ -264,8 +272,9 @@ public class CartService {
     }
 
 
-
-    /** cartItem ni bittalab o'chirish*/
+    /**
+     * cartItem ni bittalab o'chirish
+     */
     @Modifying
     @Transactional
     public void deleteItem(String cartItemId) {
@@ -298,7 +307,9 @@ public class CartService {
         wsService.broadcastStockUpdate(toDto(stock));
     }
 
-    /** Savatcha boyicha undagi tovarlarni o'chirish */
+    /**
+     * Savatcha boyicha undagi tovarlarni o'chirish
+     */
     @Modifying
     @Transactional
     public void deleteCart(String cartSessionId) {
@@ -342,22 +353,26 @@ public class CartService {
         cartItemRepository.deleteCartItemsByCartSession_Id(cartSessionId);
     }
 
-    /** Savatga Mijoz/Xamkor qoshish */
+    /**
+     * Savatga Mijoz/Xamkor qoshish
+     */
     @Transactional
     public void addCusRef(AddCustomerReferrerToCartDto dto) {
         CartSession session = cartSessionRepository.findById(dto.cardSessionId())
                 .orElseThrow(() -> new IllegalArgumentException("Session not found"));
 
-        if (dto.type().equals("CUSTOMER")){
+        if (dto.type().equals("CUSTOMER")) {
             session.setCustomer(new Customer(dto.id()));
-        }else {
+        } else {
             session.setReferrer(new Referrer(dto.id()));
         }
 
         cartSessionRepository.save(session);
     }
 
-    /** Savatdan Mijoz/Xamkor larni ochirish */
+    /**
+     * Savatdan Mijoz/Xamkor larni ochirish
+     */
     @Transactional
     public void removeCusRef(RemoveCustomerReferrerToCartDto dto) {
         CartSession session = cartSessionRepository.findById(dto.cardSessionId())
@@ -371,7 +386,9 @@ public class CartService {
         cartSessionRepository.save(session);
     }
 
-    /** Savatchani ni bekor qilish */
+    /**
+     * Savatchani ni bekor qilish
+     */
     @Transactional
     public void cancelCart(String cartSessionId) {
         // 1️⃣ CartSession ni topamiz
@@ -417,7 +434,9 @@ public class CartService {
         cartSessionRepository.save(session);
     }
 
-    /** yoradmchi - yangi cartSession chiqrish */
+    /**
+     * yoradmchi - yangi cartSession chiqrish
+     */
     private CartSession createNewSession(UserJwt userJwt) {
         CartSession session = CartSession.builder()
                 .createdByUser(userJwt.getFullName())
@@ -428,8 +447,10 @@ public class CartService {
         return cartSessionRepository.save(session);
     }
 
-    /** yordamchi - savatcha uchun raqam generatsiyasi */
-    private String generateCartNumber(){
+    /**
+     * yordamchi - savatcha uchun raqam generatsiyasi
+     */
+    private String generateCartNumber() {
         LocalDate today = LocalDate.now();
         String datePart = today.format(DateTimeFormatter.ofPattern("yyMMdd"));
         String prefix = "ST" + datePart;
@@ -447,7 +468,9 @@ public class CartService {
     }
 
     /** yordamchi - natijani dto ga set qilish */
-    /** yordamchi - natijani dto ga set qilish */
+    /**
+     * yordamchi - natijani dto ga set qilish
+     */
     private StockViewDto toDto(Stock stock) {
         BigDecimal available = stock.getQuantity().subtract(stock.getReservedQuantity());
         BigDecimal availableAlt = stock.getAltQuantity().subtract(stock.getReservedAltQuantity());

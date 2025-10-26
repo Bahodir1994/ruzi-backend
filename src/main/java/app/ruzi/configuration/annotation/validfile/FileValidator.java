@@ -42,7 +42,7 @@ public class FileValidator implements ConstraintValidator<ValidFile, MultipartFi
         if (fileSize > maxSizeInBytes || fileSize < minSizeInBytes || !allowedFormats.contains(fileExtension)) {
             // ✅ Fetch message from `messages.properties` dynamically
             String messageTemplate = messageSource.getMessage(
-                    "validation.file",
+                    "validation.text.size",
                     new Object[]{minSizeInMB, maxSizeInMB, String.join(", ", allowedFormats)},
                     LocaleContextHolder.getLocale() // Use user's locale (Uzbek, English, etc.)
             );

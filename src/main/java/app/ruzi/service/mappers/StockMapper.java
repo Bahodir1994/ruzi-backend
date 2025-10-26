@@ -3,7 +3,10 @@ package app.ruzi.service.mappers;
 import app.ruzi.configuration.utils.CommonMapperUtils;
 import app.ruzi.entity.app.Stock;
 import app.ruzi.service.payload.app.StockViewDto;
-import org.mapstruct.*;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.ReportingPolicy;
 import org.mapstruct.factory.Mappers;
 
 import java.math.BigDecimal;
@@ -45,7 +48,6 @@ public interface StockMapper {
     @Mapping(target = "reservedAltQuantity", source = "reservedAltQuantity")
     @Mapping(target = "availableAltQuantity", expression = "java(calcAvailableAlt(entity))")
     @Mapping(target = "conversionRate", source = "purchaseOrderItem.conversionRate")
-
     StockViewDto toDto(Stock entity);
 
     List<StockViewDto> toDtoList(List<Stock> stockList);

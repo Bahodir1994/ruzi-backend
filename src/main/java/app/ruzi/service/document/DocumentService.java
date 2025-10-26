@@ -11,7 +11,10 @@ import app.ruzi.service.payload.tasks.DocumentRequestDto;
 import app.ruzi.service.payload.tasks.DocumentResponseDto;
 import app.ruzi.service.payload.tasks.DocumentSingleRequestDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,8 +32,10 @@ public class DocumentService implements DocumentServiceImplement {
     private final JwtUtils jwtUtils;
 
     private final DocumentHashRepository documentHashRepository;
-    private final String PATH_DOCUMENT = "image";
     private final DocumentRepository documentRepository;
+
+    private final String PATH_DOCUMENT = "image";
+    private final String PATH_DOCUMENT_THUMB = "thumb";
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
@@ -47,7 +52,7 @@ public class DocumentService implements DocumentServiceImplement {
         boolean existsByHash = documentHashRepository.existsByHash(requestDto.getMultipartFileHash());
         if (!existsByHash) {
             Document document = new Document();
-            document.setParentId(requestDto.getParentId());
+            document.setParentId(userJwt.getClientId());
             document.setDocName(requestDto.getMultipartFile().getOriginalFilename());
             document.setDocType(requestDto.getMultipartFile().getContentType());
             document.setHash(requestDto.getMultipartFileHash());
@@ -64,6 +69,15 @@ public class DocumentService implements DocumentServiceImplement {
                         document.getParentId(),
                         Document.class.getSimpleName()
                 );
+
+                minioService.uploadThumbnail(
+                        userJwt,
+                        requestDto.getMultipartFile(),
+                        PATH_DOCUMENT_THUMB + "/" + userJwt.getClientId(),
+                        document.getParentId(),
+                        Document.class.getSimpleName()
+                );
+
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -72,21 +86,30 @@ public class DocumentService implements DocumentServiceImplement {
             documentArchiveHash.setHash(requestDto.getMultipartFileHash());
             documentHashRepository.save(documentArchiveHash);
         } else {
-            Document bntDocument = new Document();
-            bntDocument.setParentId(requestDto.getParentId());
-            bntDocument.setDocName(requestDto.getMultipartFile().getOriginalFilename());
-            bntDocument.setDocType(requestDto.getMultipartFile().getContentType());
-            bntDocument.setHash(requestDto.getMultipartFileHash());
-            bntDocument.setFileDate(new Date());
+            Document document = new Document();
+            document.setParentId(userJwt.getClientId());
+            document.setDocName(requestDto.getMultipartFile().getOriginalFilename());
+            document.setDocType(requestDto.getMultipartFile().getContentType());
+            document.setHash(requestDto.getMultipartFileHash());
+            document.setFileDate(new Date());
             UUID uuid = UUID.randomUUID();
-            bntDocument.setDocNameUni(uuid.toString().replaceAll("[^a-zA-Z0-9]", ""));
-            documentRepository.save(bntDocument);
+            document.setDocNameUni(uuid.toString().replaceAll("[^a-zA-Z0-9]", ""));
+            documentRepository.save(document);
 
             try {
                 minioService.uploadFile(
-                        userJwt, requestDto.getMultipartFile(),
+                        userJwt,
+                        requestDto.getMultipartFile(),
                         PATH_DOCUMENT + "/" + userJwt.getClientId(),
-                        bntDocument.getParentId(),
+                        userJwt.getClientId(),
+                        Document.class.getSimpleName()
+                );
+
+                minioService.uploadThumbnail(
+                        userJwt,
+                        requestDto.getMultipartFile(),
+                        "thumb/" + userJwt.getClientId(),
+                        document.getParentId(),
                         Document.class.getSimpleName()
                 );
             } catch (Exception e) {
@@ -97,13 +120,41 @@ public class DocumentService implements DocumentServiceImplement {
     }
 
     @Override
-    public List<DocumentResponseDto> read(DocumentSingleRequestDto singleRequestDto) {
-        List<Document> byParentId = documentRepository.findByParentId(singleRequestDto.getParentId());
-        return DocumentMapper.INSTANCE.toDtoList(byParentId);
+    @Transactional(readOnly = true)
+    public Map<String, Object> getDocumentPage(int page, int size) {
+        final UserJwt userJwt;
+        try {
+            userJwt = jwtUtils.extractUserFromToken();
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "fileDate"));
+        Page<Document> pageResult = documentRepository.findAllByParentId(userJwt.getClientId(), pageable);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("data", pageResult.getContent());
+        result.put("total", pageResult.getTotalElements());
+        return result;
     }
 
     @Override
-    public DocumentResponseDto download(DocumentSingleRequestDto singleRequestDto) {
+    public List<Document> read() {
+        UserJwt userJwt;
+        try {
+            userJwt = jwtUtils.extractUserFromToken();
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+        UserJwt finalUserJwt = userJwt;
+
+        List<Document> byParentId = documentRepository.findByParentId(finalUserJwt.getClientId());
+        return byParentId;
+    }
+
+    @Override
+    public DocumentResponseDto download(String id) {
         final UserJwt userJwt;
         try {
             userJwt = jwtUtils.extractUserFromToken();
@@ -113,16 +164,16 @@ public class DocumentService implements DocumentServiceImplement {
 
         DocumentResponseDto documentResponseDto = new DocumentResponseDto();
 
-        Optional<Document> optionalDocument = documentRepository.findById(singleRequestDto.getId());
+        Optional<Document> optionalDocument = documentRepository.findById(id);
 
         if (optionalDocument.isPresent()) {
-            Document bntDocument = optionalDocument.get();
-            String docName = bntDocument.getDocName();
+            Document document = optionalDocument.get();
+            String docName = document.getDocName();
 
             try (InputStream fileStream = minioService.downloadFiles(PATH_DOCUMENT + "/" + userJwt.getClientId() + "/" + docName)) {
                 documentResponseDto.setFileBytes(fileStream.readAllBytes());
-                documentResponseDto.setDocName(bntDocument.getDocName());
-                documentResponseDto.setDocType(bntDocument.getDocType());
+                documentResponseDto.setDocName(document.getDocName());
+                documentResponseDto.setDocType(document.getDocType());
                 documentResponseDto.setDocNameUni(docName);
             } catch (IOException e) {
                 throw new RuntimeException("Error when download MinIO: " + docName, e);
@@ -133,7 +184,49 @@ public class DocumentService implements DocumentServiceImplement {
     }
 
     @Override
-    @Transactional(propagation = Propagation.MANDATORY)
+    @Transactional
+    public void update(DocumentSingleRequestDto singleRequestDto) {
+        UserJwt userJwt;
+        try {
+            userJwt = jwtUtils.extractUserFromToken();
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+        Document doc = documentRepository.findById(singleRequestDto.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Document topilmadi"));
+
+        String currentName = doc.getDocName();
+        String currentExt = "";
+
+        // 🔹 formatni ajratamiz (.jpg, .png, .pdf, ...)
+        int dotIndex = currentName.lastIndexOf('.');
+        if (dotIndex != -1) {
+            currentExt = currentName.substring(dotIndex);
+        }
+
+        String newName = singleRequestDto.getName();
+        if (!newName.contains(".")) {
+            newName = newName + currentExt;
+        }
+
+        // 🔹 MinIO fayl yo‘llari
+        String oldPath = PATH_DOCUMENT + "/" + userJwt.getClientId() + "/" + currentName;
+        String newPath = PATH_DOCUMENT + "/" + userJwt.getClientId() + "/" + newName;
+
+        // 🔹 MinIO faylini ham nomini o‘zgartiramiz
+        try {
+            minioService.renameFile(oldPath, newPath);
+        } catch (Exception e) {
+            throw new RuntimeException("MinIO faylni o‘zgartirishda xatolik: " + e.getMessage(), e);
+        }
+
+        // 🔹 Bazada nomni yangilaymiz
+        documentRepository.updateByIdAndDocName(singleRequestDto.getId(), userJwt.getClientId(), newName);
+    }
+
+    @Override
+    @Transactional
     public void delete(DocumentSingleRequestDto singleRequestDto) {
         final UserJwt userJwt;
         try {

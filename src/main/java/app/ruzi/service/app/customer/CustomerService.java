@@ -17,7 +17,9 @@ public class CustomerService {
 
     private final CustomerRepository customerRepository;
 
-    /** client boyicha barcha mijozlarni berish */
+    /**
+     * client boyicha barcha mijozlarni berish
+     */
     public List<Customer> getAllCustomers() {
         return customerRepository.findAll();
     }

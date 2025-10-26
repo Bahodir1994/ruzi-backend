@@ -1,15 +1,13 @@
 package app.ruzi.service.payload.app;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
-import java.math.BigDecimal;
-
 @Builder
-public record AddCustomerReferrerToCartDto (
+public record AddCustomerReferrerToCartDto(
         @NotBlank String id,
         @NotBlank String cardSessionId,
         @NotBlank String type //CUSTOMER / REFERRER
-) {}
+) {
+}
 

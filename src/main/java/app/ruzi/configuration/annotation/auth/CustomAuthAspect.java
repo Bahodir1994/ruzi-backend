@@ -33,11 +33,11 @@ public class CustomAuthAspect {
 
         CurrentUserProvider.setCurrentUser(userJwt.getUsername());
         CurrentUserProvider.setCurrentRoles(
-            userJwt.getRoles()
-                    .stream()
-                    .map(RoleAndPermissionDto::getRoleName)
-                    .filter(Objects::nonNull)
-                    .toList()
+                userJwt.getRoles()
+                        .stream()
+                        .map(RoleAndPermissionDto::getRoleName)
+                        .filter(Objects::nonNull)
+                        .toList()
         );
         CurrentTenantProvider.setCurrentClient(userJwt.getClientId());
         CurrentWarehouseProvider.setCurrentWarehouse(userJwt.getWarehouseId());

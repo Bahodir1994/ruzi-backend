@@ -14,11 +14,11 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayInputStream;
-import java.util.List;
 
 @RestController
 @RequestMapping("/route-file/crud")
@@ -28,8 +28,9 @@ public class FileController {
     private final DocumentService documentService;
 
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    @CustomAuthRole(roles = {"ROLE_ITEM_CREATE"})
-    @MethodInfo(methodName = "bnt-file-create")
+    @PreAuthorize("hasAuthority('ROLE_IMAGE_READ')")
+    @CustomAuthRole(roles = {"ROLE_IMAGE_CREATE"})
+    @MethodInfo(methodName = "file-create")
     public ResponseEntity<Object> create(
             @RequestHeader(value = "Accept-Language", required = false) String langType,
             @Valid @ModelAttribute DocumentRequestDto documentRequestDto,
@@ -44,47 +45,47 @@ public class FileController {
         return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
     }
 
-    @GetMapping("/{type}/{id}")
-    @CustomAuthRole(roles = {"ROLE_BNT_READ", "ROLE_BNT_READ_FULL"})
-    @MethodInfo(methodName = "bnt-file-read")
+    @GetMapping
+    @PreAuthorize("hasAuthority('ROLE_IMAGE_READ')")
+    @MethodInfo(methodName = "file-read")
     public ResponseEntity<Object> read(
-            @RequestHeader(value = "Accept-Language", required = false) String langType,
-            @PathVariable(value = "type") String type,
-            @PathVariable(value = "id") String id,
-            @Valid DocumentSingleRequestDto singleRequestDto,
-            BindingResult bindingResult
+            @RequestHeader(value = "Accept-Language", required = false) String langType
     ) {
-        singleRequestDto.setParentId(id);
-        singleRequestDto.setType(type);
-
         MessageResponse messageResponse = handlerService.handleRequest(
-                () -> documentService.read(singleRequestDto),
-                bindingResult,
+                documentService::read,
                 langType
         );
 
         return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
     }
 
-    @GetMapping(value = "/{type}/{docId}/{id}")
-    @CustomAuthRole(roles = {"ROLE_BNT_READ", "ROLE_BNT_READ_FULL"})
-    @MethodInfo(methodName = "bnt-file-download")
+
+    @GetMapping("/page")
+    @PreAuthorize("hasAuthority('ROLE_IMAGE_READ')")
+    @MethodInfo(methodName = "file-read-page")
+    public ResponseEntity<Object> readPage(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "40") int size,
+            @RequestHeader(value = "Accept-Language", required = false) String langType
+    ) {
+        MessageResponse messageResponse = handlerService.handleRequest(
+                () -> documentService.getDocumentPage(page, size),
+                langType
+        );
+        return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
+    }
+
+
+
+    @GetMapping(value = "/{id}")
+    @PreAuthorize("hasAuthority('ROLE_IMAGE_READ')")
+    @MethodInfo(methodName = "file-download")
     public ResponseEntity<InputStreamResource> download(
             @RequestHeader(value = "Accept-Language", required = false) String langType,
-            @PathVariable(value = "type") String type,
-            @PathVariable(value = "docId") String docId,
-            @PathVariable(value = "id") String id,
-            @Valid DocumentSingleRequestDto singleRequestDto,
-            BindingResult bindingResult
+            @PathVariable(value = "id") String id
     ) {
-
-        singleRequestDto.setType(type);
-        singleRequestDto.setParentId(id);
-        singleRequestDto.setId(docId);
-
         MessageResponse messageResponse = handlerService.handleRequest(
-                () -> documentService.download(singleRequestDto),
-                bindingResult,
+                () -> documentService.download(id),
                 langType
         );
 
@@ -99,21 +100,31 @@ public class FileController {
                 .body(resource);
     }
 
-    @DeleteMapping
-    @CustomAuthRole(roles = {"ROLE_BNT_DELETE"})
-    @MethodInfo(methodName = "bnt-file-delete")
-    public ResponseEntity<Object> delete(
+    @PatchMapping
+    @PreAuthorize("hasAuthority('ROLE_IMAGE_READ')")
+    @MethodInfo(methodName = "file-update")
+    public ResponseEntity<Object> update(
             @RequestHeader(value = "Accept-Language", required = false) String langType,
-            @RequestParam("parentId") String summaryId,
-            @RequestParam("type") String type,
-            @RequestParam("documentId") List<String> documentIds,
-            @Valid DocumentSingleRequestDto singleRequestDto,
+            @RequestBody @Valid DocumentSingleRequestDto singleRequestDto,
             BindingResult bindingResult
     ) {
-        singleRequestDto.setParentId(summaryId);
-        singleRequestDto.setType(type);
-        singleRequestDto.setIdList(documentIds);
+        MessageResponse messageResponse = handlerService.handleRequest(
+                () -> documentService.update(singleRequestDto),
+                bindingResult,
+                langType
+        );
 
+        return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
+    }
+
+    @DeleteMapping
+    @PreAuthorize("hasAuthority('ROLE_IMAGE_DELETE')")
+    @MethodInfo(methodName = "file-delete")
+    public ResponseEntity<Object> delete(
+            @RequestHeader(value = "Accept-Language", required = false) String langType,
+            @Valid @RequestBody DocumentSingleRequestDto singleRequestDto,
+            BindingResult bindingResult
+    ) {
         MessageResponse messageResponse = handlerService.handleRequest(
                 () -> documentService.delete(singleRequestDto),
                 bindingResult,

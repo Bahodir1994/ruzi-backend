@@ -13,5 +13,6 @@ public record AddCartItemDto(
         @NotNull BigDecimal quantity,
         @NotNull BigDecimal unitPrice,
         @NotBlank String unitType // "PACK" yoki "PCS"
-) {}
+) {
+}
 

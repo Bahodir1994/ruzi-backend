@@ -26,5 +26,6 @@ public record CartItemViewDto(
 
         // --- 🔽 CartItem'dan ---
         BigDecimal saleDiscount     // Kassir bergan chegirma (bizning)
-) {}
+) {
+}
 

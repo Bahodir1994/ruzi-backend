@@ -1,6 +1,7 @@
 package app.ruzi.service.app.category;
 
 import app.ruzi.entity.app.Category;
+import app.ruzi.service.payload.app.CategoryDto;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
@@ -12,4 +13,5 @@ public interface CategoryServiceImplement {
 
     List<Category> getCategoryList();
 
+    void create(CategoryDto categoryDto);
 }

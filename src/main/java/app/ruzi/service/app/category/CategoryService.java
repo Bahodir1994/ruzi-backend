@@ -2,7 +2,10 @@ package app.ruzi.service.app.category;
 
 import app.ruzi.entity.app.Category;
 import app.ruzi.repository.app.CategoryRepository;
+import app.ruzi.repository.app.ItemRepository;
+import app.ruzi.service.payload.app.CategoryDto;
 import jakarta.persistence.criteria.JoinType;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
@@ -15,6 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CategoryService implements CategoryServiceImplement {
     private final CategoryRepository categoryRepository;
+    private final ItemRepository itemRepository;
 
     @Override
     public DataTablesOutput<Category> getCategories(DataTablesInput dataTablesInput) {
@@ -28,6 +32,20 @@ public class CategoryService implements CategoryServiceImplement {
     @Override
     public List<Category> getCategoryList() {
         return categoryRepository.findAll();
+    }
+
+    @Override
+    @Transactional
+    public void create(CategoryDto dto) {
+
+        Category category = new Category();
+        category.setCode(dto.getCode());
+        category.setPrimaryImageUrl(dto.getPrimaryImageUrl());
+        categoryRepository.saveAndFlush(category);
+
+        if (dto.getItems() != null && !dto.getItems().isEmpty()) {
+            itemRepository.assignCategoryToItems(category, dto.getItems());
+        }
     }
 
 }

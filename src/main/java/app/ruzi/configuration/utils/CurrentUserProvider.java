@@ -7,10 +7,10 @@ import java.util.List;
 /**
  * Request kontekstida hozirgi foydalanuvchi haqida ma'lumotni saqlaydi.
  * (Masalan: username va roles).
- *
+ * <p>
  * Eslatma:
- *  - Bu klass har bir HTTP request uchun ishlaydi (ThreadLocal orqali)
- *  - So‘rov tugaganda .clear() chaqirish shart (masalan, filter yoki interceptor ichida)
+ * - Bu klass har bir HTTP request uchun ishlaydi (ThreadLocal orqali)
+ * - So‘rov tugaganda .clear() chaqirish shart (masalan, filter yoki interceptor ichida)
  */
 public class CurrentUserProvider {
 

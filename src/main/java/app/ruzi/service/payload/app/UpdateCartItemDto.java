@@ -10,4 +10,5 @@ import java.math.BigDecimal;
 public record UpdateCartItemDto(
         @NotBlank String cartItemId,
         @NotNull BigDecimal newQuantity
-) {}
+) {
+}
