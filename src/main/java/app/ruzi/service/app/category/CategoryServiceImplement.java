@@ -14,4 +14,6 @@ public interface CategoryServiceImplement {
     List<Category> getCategoryList();
 
     void create(CategoryDto categoryDto);
+
+    void update(CategoryDto categoryDto);
 }

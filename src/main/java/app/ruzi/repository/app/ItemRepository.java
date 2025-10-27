@@ -22,4 +22,8 @@ public interface ItemRepository extends JpaRepository<Item, String>, DataTablesR
     @Query("UPDATE Item i SET i.category = :category WHERE i.id IN :ids")
     void assignCategoryToItems(@Param("category") Category category, @Param("ids") List<String> ids);
 
+    @Modifying
+    @Query("UPDATE Item i SET i.category = NULL WHERE i.category.id = :categoryId")
+    void unassignCategoryFromItems(@Param("categoryId") String categoryId);
+
 }

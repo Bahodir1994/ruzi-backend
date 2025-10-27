@@ -25,7 +25,7 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping("/data-table-main")
-    //@CustomAuthRole(roles = {"ROLE_CATEGORY_READ"})
+    @PreAuthorize("hasAuthority('ROLE_CAT_READ')")
     @MethodInfo(methodName = "read-category-table")
     public ResponseEntity<Object> getCategoryTable(@RequestBody @Valid DataTablesInput dataTablesInput) {
         DataTablesOutput<Category> privilegeDataTablesOutput = categoryService.getCategories(dataTablesInput);
@@ -33,7 +33,7 @@ public class CategoryController {
     }
 
     @GetMapping("/data-list-main")
-    //@CustomAuthRole(roles = {"ROLE_CATEGORY_READ"})
+    @PreAuthorize("hasAuthority('ROLE_CAT_READ')")
     @MethodInfo(methodName = "read-category-list")
     public ResponseEntity<Object> getCategoryList(
             @RequestHeader(value = "Accept-Language", required = false) String langType) {
@@ -54,6 +54,23 @@ public class CategoryController {
     ) {
         MessageResponse messageResponse = handlerService.handleRequest(
                 () -> categoryService.create(categoryDto),
+                bindingResult,
+                langType
+        );
+
+        return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
+    }
+
+    @PatchMapping("/update")
+    @PreAuthorize("hasAuthority('ROLE_CAT_UPDATE')")
+    @MethodInfo(methodName = "update-category")
+    public ResponseEntity<Object> update(
+            @RequestHeader(value = "Accept-Language", required = false) String langType,
+            @RequestBody @Valid CategoryDto categoryDto,
+            BindingResult bindingResult
+    ) {
+        MessageResponse messageResponse = handlerService.handleRequest(
+                () -> categoryService.update(categoryDto),
                 bindingResult,
                 langType
         );

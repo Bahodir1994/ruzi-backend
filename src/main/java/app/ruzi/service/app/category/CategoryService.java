@@ -48,4 +48,24 @@ public class CategoryService implements CategoryServiceImplement {
         }
     }
 
+    @Override
+    @Transactional
+    public void update(CategoryDto dto) {
+        Category category = categoryRepository.findById(dto.getId())
+                .orElseThrow(() -> new RuntimeException("Category not found with id: " + dto.getId()));
+
+        category.setCode(dto.getCode());
+        category.setPrimaryImageUrl(dto.getPrimaryImageUrl());
+        categoryRepository.saveAndFlush(category);
+
+        // Avval eski bog‘lanmalarni tozalaymiz
+        itemRepository.unassignCategoryFromItems(dto.getId());
+
+        // Yangi itemlarni bog‘laymiz
+        if (dto.getItems() != null && !dto.getItems().isEmpty()) {
+            itemRepository.assignCategoryToItems(category, dto.getItems());
+        }
+    }
+
+
 }

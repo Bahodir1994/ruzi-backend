@@ -1,5 +1,6 @@
 package app.ruzi.service.payload.app;
 
+import app.ruzi.configuration.annotation.uniqueCategory.UniqueCategoryCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,6 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
+@UniqueCategoryCode
 public class CategoryDto implements Serializable {
     private final String id;
     private final String code;
