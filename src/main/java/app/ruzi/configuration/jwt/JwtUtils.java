@@ -33,10 +33,10 @@ public class JwtUtils {
         JWTClaimsSet claims = jwt.getJWTClaimsSet();
         String username = claims.getStringClaim("preferred_username");
         String userId = claims.getStringClaim("sub");
-        String clientId = "client1";
-//        String clientId = "b845ff3d-fbb9-4a18-8ba2-127bcc5692d6";
-        String warehouseId = "WH-001";
-//        String warehouseId = "895435b1-9417-4ff0-8cf3-fc874ca26b8e";
+//        String clientId = "client1";
+        String clientId = "b845ff3d-fbb9-4a18-8ba2-127bcc5692d6";
+//        String warehouseId = "WH-001";
+        String warehouseId = "895435b1-9417-4ff0-8cf3-fc874ca26b8e";
         String fullName = claims.getStringClaim("name");
         String locationCode = claims.getStringClaim("location_code");
         String postId = claims.getStringClaim("post_code");
