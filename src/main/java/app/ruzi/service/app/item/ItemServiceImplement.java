@@ -1,7 +1,7 @@
 package app.ruzi.service.app.item;
 
 import app.ruzi.entity.app.Item;
-import app.ruzi.service.payload.ItemRequestDto;
+import app.ruzi.service.payload.app.ItemRequestDto;
 import app.ruzi.service.payload.app.ItemDto;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;

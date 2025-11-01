@@ -1,4 +1,4 @@
-package app.ruzi.service.payload;
+package app.ruzi.service.payload.app;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -27,7 +27,7 @@ public record ItemRequestDto(
         String price,
 
         /** Kategoriya ID — majburiy (UUID formatida bo‘lishi kerak) */
-        @NotBlank(message = "Kategoriya ID bo‘sh bo‘lmasligi kerak")
+        @NotBlank(message = "Kategoriya tanlanmagan")
         @Pattern(regexp = "^[0-9a-fA-F-]{36}$", message = "Kategoriya ID noto‘g‘ri formatda (UUID kutilmoqda)")
         String categoryId,
 
@@ -58,6 +58,7 @@ public record ItemRequestDto(
         String brand,
 
         /** Birlik kodi (masalan: 'dona', 'kg', 'l') */
+        @NotBlank(message = "O‘lchov birligi bo‘sh bo‘lmasligi kerak")
         @Size(max = 3, message = "Birlik (unit) 3 belgidan oshmasligi kerak")
         String unit,
 

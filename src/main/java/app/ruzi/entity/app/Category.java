@@ -40,7 +40,7 @@ public class Category extends AbstractAuditingEntity {
     private String code;
 
     @Column(name = "parent_id", length = 50)
-    private String parentDd;
+    private String parentId;
 
     @OneToMany(
             mappedBy = "category",

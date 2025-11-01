@@ -67,6 +67,7 @@ public class Item extends AbstractAuditingEntity {
 
     @Column(length = 600)
     private String description;
+
 }
 
 

@@ -2,7 +2,7 @@ package app.ruzi.service.mappers;
 
 import app.ruzi.configuration.utils.CommonMapperUtils;
 import app.ruzi.entity.app.Item;
-import app.ruzi.service.payload.ItemRequestDto;
+import app.ruzi.service.payload.app.ItemRequestDto;
 import app.ruzi.service.payload.app.ItemDto;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;

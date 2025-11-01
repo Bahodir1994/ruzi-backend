@@ -9,6 +9,7 @@ import app.ruzi.service.payload.app.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,7 +22,7 @@ public class CartController {
     private final HandlerService handlerService;
 
     @PostMapping("/create")
-    @CustomAuthRole(roles = {"ROLE_CART_CREATE"})
+    @PreAuthorize("hasAuthority('ROLE_CART_CREATE')")
     @MethodInfo(methodName = "create-card-session")
     public ResponseEntity<?> create(
             @RequestHeader(value = "Accept-Language", required = false) String langType,
@@ -37,7 +38,7 @@ public class CartController {
     }
 
     @PostMapping("/add-item")
-    @CustomAuthRole(roles = {"ROLE_CART_CREATE"})
+    @PreAuthorize("hasAuthority('ROLE_CART_CREATE')")
     @MethodInfo(methodName = "add-item-to-card")
     public ResponseEntity<?> addItem(
             @RequestHeader(value = "Accept-Language", required = false) String langType,
@@ -51,7 +52,7 @@ public class CartController {
     }
 
     @PostMapping("/update-item")
-    @CustomAuthRole(roles = {"ROLE_CART_CREATE"})
+    @PreAuthorize("hasAuthority('ROLE_CART_CREATE')")
     @MethodInfo(methodName = "update-item-quantity")
     public ResponseEntity<?> updateItem(
             @RequestHeader(value = "Accept-Language", required = false) String langType,
@@ -65,7 +66,7 @@ public class CartController {
     }
 
     @PatchMapping("/update-item-price")
-    @CustomAuthRole(roles = {"ROLE_CART_CREATE"})
+    @PreAuthorize("hasAuthority('ROLE_CART_CREATE')")
     @MethodInfo(methodName = "update-item-price")
     public ResponseEntity<?> updateItemPrice(
             @RequestHeader(value = "Accept-Language", required = false) String langType,
@@ -80,7 +81,7 @@ public class CartController {
 
 
     @GetMapping("/get-item/{cartSessionId}")
-    @CustomAuthRole(roles = {"ROLE_CART_CREATE"})
+    @PreAuthorize("hasAuthority('ROLE_CART_CREATE')")
     @MethodInfo(methodName = "get-item-quantity")
     public ResponseEntity<?> getItem(
             @RequestHeader(value = "Accept-Language", required = false) String langType,
@@ -94,7 +95,7 @@ public class CartController {
     }
 
     @DeleteMapping("/delete-item/{cartItemId}")
-    @CustomAuthRole(roles = {"ROLE_CART_CREATE"})
+    @PreAuthorize("hasAuthority('ROLE_CART_CREATE')")
     @MethodInfo(methodName = "delete-cart-item")
     public ResponseEntity<?> deleteItem(
             @RequestHeader(value = "Accept-Language", required = false) String langType,
@@ -108,7 +109,7 @@ public class CartController {
     }
 
     @DeleteMapping("/delete-cart/{cartSessionId}")
-    @CustomAuthRole(roles = {"ROLE_CART_CREATE"})
+    @PreAuthorize("hasAuthority('ROLE_CART_CREATE')")
     @MethodInfo(methodName = "delete-cart-session")
     public ResponseEntity<?> deleteCart(
             @RequestHeader(value = "Accept-Language", required = false) String langType,
@@ -122,7 +123,7 @@ public class CartController {
     }
 
     @DeleteMapping("/cancel-cart/{cartSessionId}")
-    @CustomAuthRole(roles = {"ROLE_CART_CREATE"})
+    @PreAuthorize("hasAuthority('ROLE_CART_CREATE')")
     @MethodInfo(methodName = "cancel-cart-session")
     public ResponseEntity<?> cancelCart(
             @RequestHeader(value = "Accept-Language", required = false) String langType,
@@ -136,7 +137,7 @@ public class CartController {
     }
 
     @PatchMapping("/add-customer-referrer")
-    @CustomAuthRole(roles = {"ROLE_CART_CREATE"})
+    @PreAuthorize("hasAuthority('ROLE_CART_CREATE')")
     @MethodInfo(methodName = "add-item-to-card")
     public ResponseEntity<?> addItem(
             @RequestHeader(value = "Accept-Language", required = false) String langType,
@@ -150,7 +151,7 @@ public class CartController {
     }
 
     @DeleteMapping("/remove-customer-referrer/{cardSessionId}/{type}")
-    @CustomAuthRole(roles = {"ROLE_CART_CREATE"})
+    @PreAuthorize("hasAuthority('ROLE_CART_CREATE')")
     @MethodInfo(methodName = "delete-cart-item")
     public ResponseEntity<?> deleteCusRef(
             @RequestHeader(value = "Accept-Language", required = false) String langType,

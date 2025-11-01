@@ -31,7 +31,7 @@ public class CategoryService implements CategoryServiceImplement {
 
     @Override
     public List<Category> getCategoryList() {
-        return categoryRepository.findAll();
+        return categoryRepository.findAllByIsDeleted(false);
     }
 
     @Override

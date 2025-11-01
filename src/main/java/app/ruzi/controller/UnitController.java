@@ -11,6 +11,7 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -22,7 +23,7 @@ public class UnitController {
     private final UnitService unitService;
 
     @PostMapping("/data-table-main")
-    //@CustomAuthRole(roles = {"ROLE_CATEGORY_READ"})
+    @PreAuthorize("hasAuthority('ROLE_CAT_READ')")
     @MethodInfo(methodName = "read-unit-table")
     public ResponseEntity<Object> read_table_data(@RequestBody @Valid DataTablesInput dataTablesInput) {
         DataTablesOutput<Unit> privilegeDataTablesOutput = unitService.getUnit(dataTablesInput);
@@ -30,7 +31,7 @@ public class UnitController {
     }
 
     @GetMapping("/data-list-main")
-    //@CustomAuthRole(roles = {"ROLE_CATEGORY_READ"})
+    @PreAuthorize("hasAuthority('ROLE_CAT_READ')")
     @MethodInfo(methodName = "read-unit-list")
     public ResponseEntity<Object> read_list_data(
             @RequestHeader(value = "Accept-Language", required = false) String langType) {

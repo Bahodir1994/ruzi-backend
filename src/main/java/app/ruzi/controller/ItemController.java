@@ -4,7 +4,7 @@ import app.ruzi.configuration.messaging.HandlerService;
 import app.ruzi.configuration.messaging.MessageResponse;
 import app.ruzi.entity.app.Item;
 import app.ruzi.service.app.item.ItemService;
-import app.ruzi.service.payload.ItemRequestDto;
+import app.ruzi.service.payload.app.ItemRequestDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
