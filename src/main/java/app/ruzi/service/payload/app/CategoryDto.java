@@ -1,12 +1,12 @@
 package app.ruzi.service.payload.app;
 
-import app.ruzi.configuration.annotation.uniqueCategory.UniqueCategoryCode;
+import app.ruzi.configuration.annotation.uniqueCategory.UniqueField;
+import app.ruzi.entity.app.Category;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -15,10 +15,13 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
-@UniqueCategoryCode
 public class CategoryDto implements Serializable {
+
     private final String id;
+
+    @UniqueField(entityClass = Category.class, fieldEntity = {"code"})
     private final String code;
+
     private final String primaryImageUrl;
     private final List<String> items;
 }

@@ -1,5 +1,8 @@
 package app.ruzi.service.payload.app;
 
+import app.ruzi.configuration.annotation.uniqueCategory.UniqueField;
+import app.ruzi.entity.app.Category;
+import app.ruzi.entity.app.Item;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -10,11 +13,13 @@ import lombok.Builder;
  * Barcha maydonlar String sifatida olinadi va validatsiya qilinadi.
  */
 @Builder
+
 public record ItemRequestDto(
 
         /** Tovar kodi — majburiy, kategoriya ichida unikal bo‘lishi kerak */
         @NotBlank(message = "Mahsulot kodi (code) bo‘sh bo‘lmasligi kerak")
         @Size(max = 100, message = "Mahsulot kodi 100 belgidan oshmasligi kerak")
+        @UniqueField(entityClass = Item.class, fieldEntity = {"code"})
         String code,
 
         /** Mahsulot nomi — majburiy */
@@ -27,7 +32,7 @@ public record ItemRequestDto(
         String price,
 
         /** Kategoriya ID — majburiy (UUID formatida bo‘lishi kerak) */
-        @NotBlank(message = "Kategoriya tanlanmagan")
+//        @NotBlank(message = "Kategoriya tanlanmagan")
         @Pattern(regexp = "^[0-9a-fA-F-]{36}$", message = "Kategoriya ID noto‘g‘ri formatda (UUID kutilmoqda)")
         String categoryId,
 
