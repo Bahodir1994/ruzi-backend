@@ -13,15 +13,6 @@ import java.util.List;
 @Component
 public class CustomCorsFilter implements Filter {
 
-    // Ruxsat berilgan originlar ro‘yxati (agar cheklamoqchi bo‘lsangiz)
-    private static final List<String> ALLOWED_ORIGINS = List.of(
-            "http://localhost:4200",
-            "http://127.0.0.1:4200",
-            "http://192.168.0.108:4200",
-            "http://192.168.170.6:4200",
-            "http://192.168.224.18:4200"
-    );
-
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
