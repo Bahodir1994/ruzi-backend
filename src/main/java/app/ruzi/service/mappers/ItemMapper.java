@@ -4,6 +4,7 @@ import app.ruzi.configuration.utils.CommonMapperUtils;
 import app.ruzi.entity.app.Item;
 import app.ruzi.service.payload.app.ItemRequestDto;
 import app.ruzi.service.payload.app.ItemDto;
+import app.ruzi.service.payload.app.ItemRequestSimpleDto;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
@@ -32,6 +33,11 @@ public interface ItemMapper {
     @Mapping(target = "description", source = "description", qualifiedByName = "stringOrBlankToString")
     @Mapping(target = "client", ignore = true)
     Item toEntity(ItemRequestDto dto);
+
+    @Mapping(target = "price", source = "price", qualifiedByName = "stringToBigDecimal")
+    @Mapping(target = "isActive", source = "isActive", qualifiedByName = "stringToBoolean")
+    @Mapping(target = "name", source = "name", qualifiedByName = "stringOrBlankToString")
+    Item toEntitySimple(ItemRequestSimpleDto dto);
 
     /*****************************************************
      * 🧩 ENTITY → DTO (javob uchun)

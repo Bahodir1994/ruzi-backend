@@ -13,7 +13,6 @@ import lombok.Builder;
  * Barcha maydonlar String sifatida olinadi va validatsiya qilinadi.
  */
 @Builder
-
 public record ItemRequestDto(
 
         /** Tovar kodi — majburiy, kategoriya ichida unikal bo‘lishi kerak */

@@ -10,7 +10,8 @@ import lombok.*;
         name = "item",
         schema = "ruzi",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"category_id", "code"})
+                @UniqueConstraint(columnNames = {"client_id", "code"}),
+                @UniqueConstraint(columnNames = {"client_id", "sku_code"})
         },
         indexes = {
                 @Index(name = "idx_item_code", columnList = "code")
@@ -53,7 +54,10 @@ public class Item extends AbstractAuditingEntity {
     @Column(name = "primary_image_url", length = 300)
     private String primaryImageUrl;
 
-    @Column(unique = true, nullable = false, length = 50)
+    @Column(name = "internal_sku_number")
+    private Integer internalSkuNumber;
+
+    @Column(nullable = false, length = 50)
     private String skuCode;
 
     @Column(unique = true, length = 100)

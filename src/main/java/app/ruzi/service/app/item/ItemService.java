@@ -5,6 +5,7 @@ import app.ruzi.repository.app.ItemRepository;
 import app.ruzi.service.mappers.ItemMapper;
 import app.ruzi.service.payload.app.ItemRequestDto;
 import app.ruzi.service.payload.app.ItemDto;
+import app.ruzi.service.payload.app.ItemRequestSimpleDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
@@ -18,11 +19,29 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ItemService implements ItemServiceImplement {
     private final ItemRepository itemRepository;
+    private final ItemCodeGeneratorService generator;
+    private final BarcodeGeneratorService barcodeGenerator;
 
     @Override
     @Transactional
     public void create(ItemRequestDto itemRequestDto) {
         Item productEntity = ItemMapper.INSTANCE.toEntity(itemRequestDto);
+        itemRepository.save(productEntity);
+    }
+
+    @Override
+    public void create_simple(ItemRequestSimpleDto itemRequestDto) {
+        Item productEntity = ItemMapper.INSTANCE.toEntitySimple(itemRequestDto);
+
+        String code = generator.generatePluCode();
+        productEntity.setCode(code);
+
+        String sku = generator.generateSkuCode();
+        productEntity.setSkuCode(sku);
+        productEntity.setInternalSkuNumber(extractNumber(sku));
+
+        productEntity.setBarcode(barcodeGenerator.generateBarcode());
+
         itemRepository.save(productEntity);
     }
 
@@ -50,4 +69,7 @@ public class ItemService implements ItemServiceImplement {
         return itemRepository.findAll(dataTablesInput);
     }
 
+    private Integer extractNumber(String sku) {
+        return Integer.valueOf(sku.substring(sku.lastIndexOf("-") + 1));
+    }
 }

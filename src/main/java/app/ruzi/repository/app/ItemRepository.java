@@ -26,4 +26,12 @@ public interface ItemRepository extends JpaRepository<Item, String>, DataTablesR
     @Query("UPDATE Item i SET i.category = NULL WHERE i.category.id = :categoryId")
     void unassignCategoryFromItems(@Param("categoryId") String categoryId);
 
+    /**/
+    @Query("select max(cast(i.code as integer)) from Item i where i.client.id = :clientId")
+    Integer findMaxCodeByClient(@Param("clientId") String clientId);
+
+    @Query("select max(i.internalSkuNumber) from Item i where i.client.id = :clientId")
+    Integer findMaxSkuByClient(@Param("clientId") String clientId);
+
+    boolean existsByBarcode(String barcode);
 }
