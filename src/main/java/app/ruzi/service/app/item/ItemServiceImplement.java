@@ -22,6 +22,6 @@ public interface ItemServiceImplement {
     void update(ItemDto itemDto);
 
     /* Tables */
-    DataTablesOutput<Item> readTableProduct(DataTablesInput dataTablesInput);
+    DataTablesOutput<Item> readTableItem(DataTablesInput dataTablesInput);
 
 }

@@ -1,5 +1,6 @@
 package app.ruzi.controller;
 
+import app.ruzi.configuration.annotation.auth.MethodInfo;
 import app.ruzi.configuration.messaging.HandlerService;
 import app.ruzi.configuration.messaging.MessageResponse;
 import app.ruzi.entity.app.Item;
@@ -15,6 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/route-item")
@@ -58,11 +62,37 @@ public class ItemController {
         return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
     }
 
+    @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasAuthority('ROLE_ITEM_DELETE')")
+    public ResponseEntity<?> deleteOne(
+            @RequestHeader(value = "Accept-Language", required = false) String langType,
+            @PathVariable String id
+    ) {
+        MessageResponse messageResponse = handlerService.handleRequest(
+                () -> itemService.delete(List.of(id)),
+                langType
+        );
+        return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
+    }
+
+    @PostMapping("/delete")
+    public ResponseEntity<?> deleteMany(
+            @RequestHeader(value = "Accept-Language", required = false) String langType,
+            @RequestBody Map<String, List<String>> req
+    ) {
+        List<String> ids = req.get("ids");
+
+        MessageResponse messageResponse = handlerService.handleRequest(
+                () -> itemService.delete(ids),
+                langType
+        );
+        return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
+    }
 
     @PostMapping("/data-table-main")
     @PreAuthorize("hasAuthority('ROLE_ITEM_READ')")
     public ResponseEntity<Object> read_table_data(@RequestBody @Valid DataTablesInput dataTablesInput) {
-        DataTablesOutput<Item> privilegeDataTablesOutput = itemService.readTableProduct(dataTablesInput);
+        DataTablesOutput<Item> privilegeDataTablesOutput = itemService.readTableItem(dataTablesInput);
         return new ResponseEntity<>(privilegeDataTablesOutput, HttpStatus.OK);
     }
 }

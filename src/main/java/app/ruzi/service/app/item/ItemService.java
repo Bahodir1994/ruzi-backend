@@ -2,6 +2,7 @@ package app.ruzi.service.app.item;
 
 import app.ruzi.entity.app.Item;
 import app.ruzi.repository.app.ItemRepository;
+import app.ruzi.repository.app.PurchaseOrderItemRepository;
 import app.ruzi.service.mappers.ItemMapper;
 import app.ruzi.service.payload.app.ItemRequestDto;
 import app.ruzi.service.payload.app.ItemDto;
@@ -9,6 +10,7 @@ import app.ruzi.service.payload.app.ItemRequestSimpleDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +21,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ItemService implements ItemServiceImplement {
     private final ItemRepository itemRepository;
+    private final PurchaseOrderItemRepository purchaseOrderItemRepository;
+
     private final ItemCodeGeneratorService generator;
     private final BarcodeGeneratorService barcodeGenerator;
 
@@ -52,8 +56,20 @@ public class ItemService implements ItemServiceImplement {
     }
 
     @Override
+    @Transactional
     public void delete(List<String> idList) {
-        itemRepository.deleteAllByIdList(idList);
+
+        List<String> usedItemIds = purchaseOrderItemRepository.findUsedItemIds(idList);
+
+        List<String> notUsedItems = idList.stream()
+                .filter(id -> !usedItemIds.contains(id))
+                .toList();
+
+        itemRepository.deleteAllByIdList(notUsedItems);
+
+        if (!usedItemIds.isEmpty()) {
+            itemRepository.softDelete(usedItemIds);
+        }
     }
 
     @Override
@@ -65,9 +81,13 @@ public class ItemService implements ItemServiceImplement {
     }
 
     @Override
-    public DataTablesOutput<Item> readTableProduct(DataTablesInput dataTablesInput) {
-        return itemRepository.findAll(dataTablesInput);
+    public DataTablesOutput<Item> readTableItem(DataTablesInput input) {
+        Specification<Item> spec = (root, query, cb) ->
+                cb.isFalse(root.get("isDeleted"));
+
+        return itemRepository.findAll(input, spec);
     }
+
 
     private Integer extractNumber(String sku) {
         return Integer.valueOf(sku.substring(sku.lastIndexOf("-") + 1));

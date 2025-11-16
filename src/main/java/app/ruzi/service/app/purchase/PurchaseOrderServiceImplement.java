@@ -8,4 +8,6 @@ public interface PurchaseOrderServiceImplement {
 
     DataTablesOutput<PurchaseOrder> readTablePurchaseOrder(DataTablesInput dataTablesInput);
 
+    void dasdasdasd();
+
 }

@@ -15,15 +15,19 @@ import java.util.List;
 public interface ItemRepository extends JpaRepository<Item, String>, DataTablesRepository<Item, String> {
 
     @Modifying
-    @Query("delete from Item as p where p.id in :idList")
+    @Query("delete from Item as p where p.id in (:idList)")
     void deleteAllByIdList(@Param("idList") List<String> idList);
 
     @Modifying
-    @Query("UPDATE Item i SET i.category = :category WHERE i.id IN :ids")
+    @Query("update Item as itm set itm.isDeleted = true where itm.id in (:ids)")
+    void softDelete(@Param("ids") List<String> ids);
+
+    @Modifying
+    @Query("update Item i set i.category = :category where i.id in :ids")
     void assignCategoryToItems(@Param("category") Category category, @Param("ids") List<String> ids);
 
     @Modifying
-    @Query("UPDATE Item i SET i.category = NULL WHERE i.category.id = :categoryId")
+    @Query("update Item i set i.category = null where i.category.id = :categoryId")
     void unassignCategoryFromItems(@Param("categoryId") String categoryId);
 
     /**/

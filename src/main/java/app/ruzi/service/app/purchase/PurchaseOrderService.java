@@ -53,4 +53,9 @@ public class PurchaseOrderService implements PurchaseOrderServiceImplement {
         combinedSpec.and(dateSpec);
         return purchaseOrderRepository.findAll(dataTablesInput, dateSpec);
     }
+
+    @Override
+    public void dasdasdasd() {
+
+    }
 }
