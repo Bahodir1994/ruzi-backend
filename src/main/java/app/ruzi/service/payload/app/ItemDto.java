@@ -19,7 +19,7 @@ public class ItemDto implements Serializable {
     private final Timestamp insTime;
     private final Timestamp updTime;
     private final Boolean isDeleted;
-    private final String id;
+    private String id;
     private final String code;
     private final String name;
     private final Double price;

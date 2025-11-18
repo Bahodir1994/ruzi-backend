@@ -1,5 +1,6 @@
 package app.ruzi.service.app.item;
 
+import app.ruzi.configuration.exception.CustomValidationException;
 import app.ruzi.entity.app.Item;
 import app.ruzi.repository.app.ItemRepository;
 import app.ruzi.repository.app.PurchaseOrderItemRepository;
@@ -7,19 +8,35 @@ import app.ruzi.service.mappers.ItemMapper;
 import app.ruzi.service.payload.app.ItemRequestDto;
 import app.ruzi.service.payload.app.ItemDto;
 import app.ruzi.service.payload.app.ItemRequestSimpleDto;
+import app.ruzi.service.payload.app.ItemXlsxRequestDto;
+import app.ruzi.service.payload.tasks.DocumentRequestDto;
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.support.ExcelTypeEnum;
+import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ItemService implements ItemServiceImplement {
+    @Autowired
+    private Validator validator;
+
     private final ItemRepository itemRepository;
     private final PurchaseOrderItemRepository purchaseOrderItemRepository;
 
@@ -34,6 +51,7 @@ public class ItemService implements ItemServiceImplement {
     }
 
     @Override
+    @Transactional
     public void create_simple(ItemRequestSimpleDto itemRequestDto) {
         Item productEntity = ItemMapper.INSTANCE.toEntitySimple(itemRequestDto);
 
@@ -50,6 +68,46 @@ public class ItemService implements ItemServiceImplement {
     }
 
     @Override
+    @Transactional
+    public void create_by_xlsx(DocumentRequestDto request) {
+
+        MultipartFile file = request.getMultipartFile();
+        if (file == null || file.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ERROR0002");
+        }
+
+        ItemListener listener = new ItemListener(
+                dtos -> {
+                    var entities = dtos.stream()
+                            .map(ItemMapper.INSTANCE::toEntityXlsx)
+                            .toList();
+                    itemRepository.saveAll(entities);
+                },
+                validator
+        );
+
+        try (InputStream is = file.getInputStream()) {
+
+            EasyExcel.read(is, ItemXlsxRequestDto.class, listener)
+                    .excelType(ExcelTypeEnum.XLSX)
+                    .sheet(0)
+                    .doRead();
+
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "ERROR0003");
+        }
+
+        if (!listener.getValidationErrors().isEmpty()) {
+            throw new CustomValidationException(
+                    listener.getValidationErrors(),
+                    "ERROR0004",
+                    HttpStatus.UNPROCESSABLE_ENTITY
+            );
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public ItemDto read(ItemDto itemDto) {
         Optional<Item> productEntity = itemRepository.findById(itemDto.getId());
         return productEntity.map(ItemMapper.INSTANCE::toDto).orElse(null);
@@ -73,6 +131,7 @@ public class ItemService implements ItemServiceImplement {
     }
 
     @Override
+    @Transactional
     public void update(ItemDto itemDto) {
         itemRepository.findById(itemDto.getId()).ifPresent(product -> {
             ItemMapper.INSTANCE.partialUpdate(itemDto, product);
@@ -81,6 +140,7 @@ public class ItemService implements ItemServiceImplement {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public DataTablesOutput<Item> readTableItem(DataTablesInput input) {
         Specification<Item> spec = (root, query, cb) ->
                 cb.isFalse(root.get("isDeleted"));

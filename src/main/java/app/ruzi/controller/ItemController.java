@@ -5,13 +5,16 @@ import app.ruzi.configuration.messaging.HandlerService;
 import app.ruzi.configuration.messaging.MessageResponse;
 import app.ruzi.entity.app.Item;
 import app.ruzi.service.app.item.ItemService;
+import app.ruzi.service.payload.app.ItemDto;
 import app.ruzi.service.payload.app.ItemRequestDto;
 import app.ruzi.service.payload.app.ItemRequestSimpleDto;
+import app.ruzi.service.payload.tasks.DocumentRequestDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
@@ -62,6 +65,21 @@ public class ItemController {
         return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
     }
 
+    @PostMapping(path = "/create/xlsx", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PreAuthorize("hasAuthority('ROLE_ITEM_CREATE')")
+    public ResponseEntity<Object> create(
+            @RequestHeader(value = "Accept-Language", required = false) String langType,
+            @Valid @ModelAttribute DocumentRequestDto requestDto,
+            BindingResult bindingResult
+    ) {
+        MessageResponse messageResponse = handlerService.handleRequest(
+                () -> itemService.create_by_xlsx(requestDto),
+                bindingResult,
+                langType
+        );
+        return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
+    }
+
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasAuthority('ROLE_ITEM_DELETE')")
     public ResponseEntity<?> deleteOne(
@@ -88,6 +106,25 @@ public class ItemController {
         );
         return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
     }
+
+    @PutMapping("/update/{id}")
+    @PreAuthorize("hasAuthority('ROLE_ITEM_UPDATE')")
+    public ResponseEntity<Object> update(
+            @RequestHeader(value = "Accept-Language", required = false) String langType,
+            @PathVariable String id,
+            @Valid @RequestBody ItemDto itemDto,
+            BindingResult bindingResult
+    ) {
+        itemDto.setId(id);
+        MessageResponse messageResponse = handlerService.handleRequest(
+                () -> itemService.update(itemDto),
+                bindingResult,
+                langType
+        );
+
+        return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
+    }
+
 
     @PostMapping("/data-table-main")
     @PreAuthorize("hasAuthority('ROLE_ITEM_READ')")

@@ -1,10 +1,13 @@
 package app.ruzi.configuration.validation;
 
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public class ValidationErrorResponse {
-    private final List<FieldErrorInfo> errors = new ArrayList();
+    private final List<FieldErrorInfo> errors = new ArrayList<>();
 
     public ValidationErrorResponse() {
     }
@@ -13,7 +16,4 @@ public class ValidationErrorResponse {
         this.errors.add(error);
     }
 
-    public List<FieldErrorInfo> getErrors() {
-        return this.errors;
-    }
 }

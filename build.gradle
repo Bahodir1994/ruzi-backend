@@ -34,6 +34,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
+    implementation 'com.alibaba:easyexcel:4.0.3'
     implementation 'com.nimbusds:nimbus-jose-jwt:9.47'
     implementation 'com.github.darrachequesne:spring-data-jpa-datatables:6.0.1'
     implementation 'org.mapstruct:mapstruct:1.6.3'
