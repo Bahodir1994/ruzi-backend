@@ -1,7 +1,6 @@
 package app.ruzi.service.app.category;
 
 import app.ruzi.entity.app.Category;
-import app.ruzi.entity.app.Item;
 import app.ruzi.repository.app.CategoryRepository;
 import app.ruzi.repository.app.ItemRepository;
 import app.ruzi.service.payload.app.CategoryDto;
@@ -15,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor

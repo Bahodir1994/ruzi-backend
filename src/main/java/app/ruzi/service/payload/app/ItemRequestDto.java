@@ -1,7 +1,6 @@
 package app.ruzi.service.payload.app;
 
 import app.ruzi.configuration.annotation.uniqueCategory.UniqueField;
-import app.ruzi.entity.app.Category;
 import app.ruzi.entity.app.Item;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

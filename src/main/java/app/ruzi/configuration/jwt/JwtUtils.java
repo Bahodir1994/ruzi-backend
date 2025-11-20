@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -16,7 +15,7 @@ import java.util.stream.Collectors;
 @Service
 public class JwtUtils {
 
-    public UserJwt extractUserFromToken() throws ParseException {
+    public UserJwt extractUserFromToken() {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         String token = request.getHeader("Authorization");
 
@@ -28,16 +27,31 @@ public class JwtUtils {
             token = token.substring(7);
         }
 
-        JWT jwt = JWTParser.parse(token);
+        JWT jwt;
+        JWTClaimsSet claims;
+        String username = "";
+        String userId = "";
+        String clientId = "";
+        String warehouseId = "";
+        String fullName = "";
+        String locationCode = "";
+        String postId = "";
 
-        JWTClaimsSet claims = jwt.getJWTClaimsSet();
-        String username = claims.getStringClaim("preferred_username");
-        String userId = claims.getStringClaim("sub");
-        String clientId = "client1";
-        String warehouseId = "WH-001";
-        String fullName = claims.getStringClaim("name");
-        String locationCode = claims.getStringClaim("location_code");
-        String postId = claims.getStringClaim("post_code");
+        try {
+            jwt = JWTParser.parse(token);
+
+            claims = jwt.getJWTClaimsSet();
+            username = claims.getStringClaim("preferred_username");
+            userId = claims.getStringClaim("sub");
+            clientId = "client1";
+            warehouseId = "WH-001";
+            fullName = claims.getStringClaim("name");
+            locationCode = claims.getStringClaim("location_code");
+            postId = claims.getStringClaim("post_code");
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         Map<String, Object> bkoAccess = (Map<String, Object>) claims.getClaim("resource_access");
         if (bkoAccess == null || !bkoAccess.containsKey("ruzi")) {

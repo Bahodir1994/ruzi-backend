@@ -7,8 +7,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.text.ParseException;
-
 @Service
 @RequiredArgsConstructor
 public class ItemCodeGeneratorService {
@@ -21,14 +19,8 @@ public class ItemCodeGeneratorService {
      */
     @Transactional
     public String generatePluCode() {
-        UserJwt userJwt;
-        try {
-            userJwt = jwtUtils.extractUserFromToken();
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
 
-        UserJwt finalUserJwt = userJwt;
+        UserJwt finalUserJwt = jwtUtils.extractUserFromToken();
 
         Integer maxCode = itemRepository.findMaxCodeByClient(finalUserJwt.getClientId());
         int next = (maxCode == null ? 1000 : maxCode + 1);
@@ -41,14 +33,7 @@ public class ItemCodeGeneratorService {
      */
     @Transactional
     public String generateSkuCode() {
-        UserJwt userJwt;
-        try {
-            userJwt = jwtUtils.extractUserFromToken();
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
-
-        UserJwt finalUserJwt = userJwt;
+        UserJwt finalUserJwt = jwtUtils.extractUserFromToken();
 
         Integer maxSku = itemRepository.findMaxSkuByClient(finalUserJwt.getClientId());
         int next = (maxSku == null ? 1 : maxSku + 1);

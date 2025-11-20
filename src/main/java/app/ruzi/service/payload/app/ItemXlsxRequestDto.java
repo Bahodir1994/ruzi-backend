@@ -2,7 +2,9 @@ package app.ruzi.service.payload.app;
 
 import app.ruzi.service.mappers.CellToStringConverter;
 import com.alibaba.excel.annotation.ExcelProperty;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

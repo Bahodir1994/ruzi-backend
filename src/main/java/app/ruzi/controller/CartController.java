@@ -1,6 +1,5 @@
 package app.ruzi.controller;
 
-import app.ruzi.configuration.annotation.auth.CustomAuthRole;
 import app.ruzi.configuration.annotation.auth.MethodInfo;
 import app.ruzi.configuration.messaging.HandlerService;
 import app.ruzi.configuration.messaging.MessageResponse;

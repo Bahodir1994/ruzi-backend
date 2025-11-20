@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -41,14 +40,7 @@ public class CartService {
      * 1. Savatcha yaratish
      */
     public CartSession createSession(CreateCartDto createCartDto) {
-        UserJwt userJwt = new UserJwt();
-        try {
-            userJwt = jwtUtils.extractUserFromToken();
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
-
-        UserJwt finalUserJwt = userJwt;
+        UserJwt finalUserJwt = jwtUtils.extractUserFromToken();
 
         /* 1) Agar forceNew = true bo‘lsa — darhol yangi savatcha yaratiladi */
         if (createCartDto != null && Boolean.TRUE.equals(createCartDto.forceNew())) {

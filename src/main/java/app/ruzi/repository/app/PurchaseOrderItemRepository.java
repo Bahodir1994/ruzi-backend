@@ -1,6 +1,5 @@
 package app.ruzi.repository.app;
 
-import app.ruzi.entity.app.Item;
 import app.ruzi.entity.app.PurchaseOrderItem;
 import org.springframework.data.jpa.datatables.repository.DataTablesRepository;
 import org.springframework.data.jpa.repository.JpaRepository;

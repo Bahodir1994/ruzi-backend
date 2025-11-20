@@ -6,7 +6,6 @@ import app.ruzi.entity.tasks.Document;
 import app.ruzi.entity.tasks.DocumentHash;
 import app.ruzi.repository.tasks.DocumentHashRepository;
 import app.ruzi.repository.tasks.DocumentRepository;
-import app.ruzi.service.mappers.DocumentMapper;
 import app.ruzi.service.payload.tasks.DocumentRequestDto;
 import app.ruzi.service.payload.tasks.DocumentResponseDto;
 import app.ruzi.service.payload.tasks.DocumentSingleRequestDto;
@@ -21,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.ParseException;
 import java.util.*;
 
 @Service
@@ -41,13 +39,7 @@ public class DocumentService implements DocumentServiceImplement {
     @Transactional(propagation = Propagation.REQUIRED)
     public Integer create(DocumentRequestDto requestDto) {
         int countData = 0;
-
-        final UserJwt userJwt;
-        try {
-            userJwt = jwtUtils.extractUserFromToken();
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+        UserJwt userJwt = jwtUtils.extractUserFromToken();
 
         boolean existsByHash = documentHashRepository.existsByHash(requestDto.getMultipartFileHash());
         if (!existsByHash) {
@@ -122,12 +114,7 @@ public class DocumentService implements DocumentServiceImplement {
     @Override
     @Transactional(readOnly = true)
     public Map<String, Object> getDocumentPage(int page, int size) {
-        final UserJwt userJwt;
-        try {
-            userJwt = jwtUtils.extractUserFromToken();
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+        UserJwt userJwt = jwtUtils.extractUserFromToken();
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "fileDate"));
         Page<Document> pageResult = documentRepository.findAllByParentId(userJwt.getClientId(), pageable);
@@ -140,14 +127,7 @@ public class DocumentService implements DocumentServiceImplement {
 
     @Override
     public List<Document> read() {
-        UserJwt userJwt;
-        try {
-            userJwt = jwtUtils.extractUserFromToken();
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
-
-        UserJwt finalUserJwt = userJwt;
+        UserJwt finalUserJwt = jwtUtils.extractUserFromToken();
 
         List<Document> byParentId = documentRepository.findByParentId(finalUserJwt.getClientId());
         return byParentId;
@@ -155,12 +135,7 @@ public class DocumentService implements DocumentServiceImplement {
 
     @Override
     public DocumentResponseDto download(String id) {
-        final UserJwt userJwt;
-        try {
-            userJwt = jwtUtils.extractUserFromToken();
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+        UserJwt userJwt = jwtUtils.extractUserFromToken();
 
         DocumentResponseDto documentResponseDto = new DocumentResponseDto();
 
@@ -186,12 +161,7 @@ public class DocumentService implements DocumentServiceImplement {
     @Override
     @Transactional
     public void update(DocumentSingleRequestDto singleRequestDto) {
-        UserJwt userJwt;
-        try {
-            userJwt = jwtUtils.extractUserFromToken();
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+        UserJwt userJwt = jwtUtils.extractUserFromToken();
 
         Document doc = documentRepository.findById(singleRequestDto.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Document topilmadi"));
@@ -228,12 +198,7 @@ public class DocumentService implements DocumentServiceImplement {
     @Override
     @Transactional
     public void delete(DocumentSingleRequestDto singleRequestDto) {
-        final UserJwt userJwt;
-        try {
-            userJwt = jwtUtils.extractUserFromToken();
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+        UserJwt userJwt = jwtUtils.extractUserFromToken();
 
         for (String idOne : singleRequestDto.getIdList()) {
             Optional<Document> optionalDocument = documentRepository.findById(idOne);

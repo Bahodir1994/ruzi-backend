@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.text.ParseException;
 
 @Component
 @RequiredArgsConstructor
@@ -35,7 +34,7 @@ public class RequestContextInitializationFilter extends OncePerRequestFilter {
             CurrentTenantProvider.setCurrentClient(userJwt.getClientId());
             CurrentWarehouseProvider.setCurrentWarehouse(userJwt.getWarehouseId());
 
-        } catch (ParseException | RuntimeException e) {
+        } catch (RuntimeException e) {
             // Token yo‘q yoki noto‘g‘ri bo‘lsa — bu filter xatoga to‘xtamaydi,
             // Spring Security o‘zi tokenni tekshiradi
         }

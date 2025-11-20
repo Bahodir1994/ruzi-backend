@@ -1,7 +1,6 @@
 package app.ruzi.repository.tasks;
 
 import app.ruzi.entity.tasks.Document;
-import org.hibernate.annotations.SQLDelete;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.datatables.repository.DataTablesRepository;

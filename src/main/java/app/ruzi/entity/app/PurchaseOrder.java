@@ -18,7 +18,13 @@ import java.time.LocalDate;
  * to‘langan qismi va qarzi hisoblanadi.
  */
 @Entity
-@Table(name = "purchase_order", schema = "ruzi")
+@Table(
+        name = "purchase_order",
+        schema = "ruzi",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"client_id", "order_number"})
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -45,7 +51,7 @@ public class PurchaseOrder extends AbstractAuditingEntity {
      * Unikal bo‘lishi kerak. Masalan: PO-2025-001.
      * Buyurtma yaratilganda avtomatik yoki qo‘lda beriladi.
      */
-    @Column(unique = true, nullable = false, length = 50)
+    @Column(nullable = false, length = 50)
     private String orderNumber;
 
     /**

@@ -2,6 +2,7 @@ package app.ruzi.configuration.annotation.uniqueCategory;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
+
 import java.lang.annotation.*;
 
 @Documented
@@ -29,5 +30,6 @@ public @interface UniqueField {
     String message() default "Ushbu qiymat bilan yozuv allaqachon mavjud!";
 
     Class<?>[] groups() default {};
+
     Class<? extends Payload>[] payload() default {};
 }
