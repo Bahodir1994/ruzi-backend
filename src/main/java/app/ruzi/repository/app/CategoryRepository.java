@@ -4,7 +4,9 @@ import app.ruzi.entity.app.Category;
 import org.springframework.data.jpa.datatables.repository.DataTablesRepository;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,9 +18,15 @@ public interface CategoryRepository extends JpaRepository<Category, String>, Dat
     @Query("select cat from Category as cat where cat.client.id = ?1 and cat.code = ?2")
     Optional<Category> findByQueryUniCat(String clientId, String code);
 
-    @EntityGraph(attributePaths = {
-            "client"
-    })
+    @EntityGraph(attributePaths = {"client"})
     List<Category> findAllByIsDeleted(Boolean isDeleted);
+
+    @Modifying
+    @Query("delete from Category as c where c.id in (:idList)")
+    void deleteAllByIdList(@Param("idList") List<String> idList);
+
+    @Modifying
+    @Query("update Category as cat set cat.isDeleted = true where cat.id in (:ids)")
+    void softDelete(@Param("ids") List<String> ids);
 
 }

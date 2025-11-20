@@ -16,6 +16,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/route-category")
 @RequiredArgsConstructor
@@ -75,6 +78,33 @@ public class CategoryController {
                 langType
         );
 
+        return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasAuthority('ROLE_ITEM_DELETE')")
+    public ResponseEntity<?> deleteOne(
+            @RequestHeader(value = "Accept-Language", required = false) String langType,
+            @PathVariable String id
+    ) {
+        MessageResponse messageResponse = handlerService.handleRequest(
+                () -> categoryService.delete(List.of(id)),
+                langType
+        );
+        return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
+    }
+
+    @PostMapping("/delete")
+    public ResponseEntity<?> deleteMany(
+            @RequestHeader(value = "Accept-Language", required = false) String langType,
+            @RequestBody Map<String, List<String>> req
+    ) {
+        List<String> ids = req.get("ids");
+
+        MessageResponse messageResponse = handlerService.handleRequest(
+                () -> categoryService.delete(ids),
+                langType
+        );
         return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
     }
 }

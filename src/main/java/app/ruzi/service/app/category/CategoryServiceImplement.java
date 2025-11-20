@@ -16,4 +16,6 @@ public interface CategoryServiceImplement {
     void create(CategoryDto categoryDto);
 
     void update(CategoryDto categoryDto);
+
+    void delete(List<String> idList);
 }

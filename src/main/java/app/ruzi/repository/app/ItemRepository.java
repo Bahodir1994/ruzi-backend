@@ -23,6 +23,10 @@ public interface ItemRepository extends JpaRepository<Item, String>, DataTablesR
     void softDelete(@Param("ids") List<String> ids);
 
     @Modifying
+    @Query("update Item i set i.category = null where i.category.id in (:categoryIds)")
+    void clearCategoryFromItems(@Param("categoryIds") List<String> categoryIds);
+
+    @Modifying
     @Query("update Item i set i.category = :category where i.id in :ids")
     void assignCategoryToItems(@Param("category") Category category, @Param("ids") List<String> ids);
 
