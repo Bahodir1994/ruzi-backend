@@ -58,7 +58,7 @@ public class CartService {
 
         /* 3) Aks holda: kassirning eng so‘nggi OPEN sessiyasini qaytarish yoki yangisini yaratish */
         return cartSessionRepository.findFirstByInsUserAndStatusOrderByInsTimeDesc(
-                userJwt.getUsername(),
+                finalUserJwt.getUsername(),
                 CartSession.Status.OPEN
         ).orElseGet(() -> createNewSession(finalUserJwt));
     }
@@ -136,7 +136,6 @@ public class CartService {
         // 🔹 WebSocket orqali yangilanish
         wsService.broadcastStockUpdate(toDto(stock));
     }
-
 
     /**
      * Savatchadagi tovar sonini ozgartirish
