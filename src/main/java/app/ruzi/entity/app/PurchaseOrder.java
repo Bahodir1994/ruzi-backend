@@ -8,6 +8,8 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * PurchaseOrder (Xarid buyurtmasi) entitiy.
@@ -46,6 +48,14 @@ public class PurchaseOrder extends AbstractAuditingEntity {
     @JsonIgnore
     private Client client;
 
+    @OneToMany(
+            mappedBy = "purchaseOrder",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @JsonIgnore
+    private List<PurchaseOrderItem> items = new ArrayList<>();
+
     /**
      * Buyurtma raqami (№ hujjat).
      * Unikal bo‘lishi kerak. Masalan: PO-2025-001.
@@ -60,7 +70,7 @@ public class PurchaseOrder extends AbstractAuditingEntity {
      * Har doim to‘ldirilishi shart.
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "supplier_id", nullable = false)
+    @JoinColumn(name = "supplier_id")
     private Supplier supplier;
 
     /**

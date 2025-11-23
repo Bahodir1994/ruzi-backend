@@ -24,6 +24,8 @@ public interface ItemServiceImplement {
 
     void update(ItemDto itemDto);
 
+    List<Item> search(String query);
+
     /* Tables */
     DataTablesOutput<Item> readTableItem(DataTablesInput dataTablesInput);
 

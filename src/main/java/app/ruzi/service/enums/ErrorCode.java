@@ -4,6 +4,12 @@ import lombok.Getter;
 
 @Getter
 public enum ErrorCode {
+    WARN0001(
+            "WARN0001",
+            "Record was changed by another user",
+            "Yozuv boshqa foydalanuvchi tomonidan o‘zgartirilgan",
+            "Запись была изменена другим пользователем"
+    ),
 
     ERROR0002(
             "ERROR0002",
@@ -24,6 +30,13 @@ public enum ErrorCode {
             "There is an error in the uploaded document",
             "Yuklangan xujjatda xatolik mavjud",
             "В загруженном документе обнаружена ошибка"
+    ),
+
+    FORBID0001(
+            "FORBID0001",
+                    "Only purchase orders in DRAFT status can be deleted",
+                    "Faqat QORALAMA holatidagi buyurtmalarni o‘chirsa bo‘ladi",
+                    "Удалять можно только заказы в статусе ЧЕРНОВИК"
     );
 
     private final String code;

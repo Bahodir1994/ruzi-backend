@@ -138,6 +138,11 @@ public class ItemService implements ItemServiceImplement {
     }
 
     @Override
+    public List<Item> search(String query) {
+        return itemRepository.searchItem(query);
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public DataTablesOutput<Item> readTableItem(DataTablesInput input) {
         Specification<Item> spec = (root, query, cb) ->

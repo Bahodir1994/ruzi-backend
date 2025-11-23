@@ -93,6 +93,7 @@ public class ItemController {
     }
 
     @PostMapping("/delete")
+    @PreAuthorize("hasAuthority('ROLE_ITEM_DELETE')")
     public ResponseEntity<?> deleteMany(
             @RequestHeader(value = "Accept-Language", required = false) String langType,
             @RequestBody Map<String, List<String>> req
@@ -118,6 +119,20 @@ public class ItemController {
         MessageResponse messageResponse = handlerService.handleRequest(
                 () -> itemService.update(itemDto),
                 bindingResult,
+                langType
+        );
+
+        return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
+    }
+
+    @GetMapping("/search-item")
+    @PreAuthorize("hasAuthority('ROLE_ITEM_READ')")
+    public ResponseEntity<Object> searchItem(
+            @RequestHeader(value = "Accept-Language", required = false) String langType,
+            @RequestParam("query") String query
+    ) {
+        MessageResponse messageResponse = handlerService.handleRequest(
+                () -> itemService.search(query),
                 langType
         );
 

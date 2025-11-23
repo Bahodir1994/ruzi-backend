@@ -42,4 +42,12 @@ public interface ItemRepository extends JpaRepository<Item, String>, DataTablesR
     Integer findMaxSkuByClient(@Param("clientId") String clientId);
 
     boolean existsByBarcode(String barcode);
+
+    @Query("select i from Item i " +
+            "where LOWER(TRIM(i.name)) like LOWER(CONCAT('%', :q, '%')) " +
+            "or LOWER(TRIM(i.skuCode)) like LOWER(CONCAT('%', :q, '%')) " +
+            "or LOWER(TRIM(i.code)) like LOWER(CONCAT('%', :q, '%')) " +
+            "or LOWER(TRIM(i.barcode)) like LOWER(CONCAT('%', :q, '%'))"
+    )
+    List<Item> searchItem(@Param("q") String q);
 }
