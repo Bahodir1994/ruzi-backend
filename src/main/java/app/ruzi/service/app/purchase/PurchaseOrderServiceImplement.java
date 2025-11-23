@@ -27,6 +27,8 @@ public interface PurchaseOrderServiceImplement {
 
     void addItemToOrder(CreatePurchaseOrderItemDto dto);
 
+    void recalculateOrderTotals(PurchaseOrder purchaseOrder);
+
     /* datatables */
     DataTablesOutput<PurchaseOrder> readTablePurchaseOrder(DataTablesInput dataTablesInput);
 

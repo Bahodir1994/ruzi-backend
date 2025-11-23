@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Repository
@@ -23,4 +24,8 @@ public interface PurchaseOrderItemRepository extends JpaRepository<PurchaseOrder
     @Modifying
     @Query("delete from PurchaseOrderItem as p where p.purchaseOrder.id = :orderId")
     void deleteByPurchaseOrder_Id(String orderId);
+
+    @Query("select COALESCE(SUM(i.sum), 0) from PurchaseOrderItem i where i.purchaseOrder.id = :orderId")
+    BigDecimal calcOrderTotal(@Param("orderId") String orderId);
+
 }

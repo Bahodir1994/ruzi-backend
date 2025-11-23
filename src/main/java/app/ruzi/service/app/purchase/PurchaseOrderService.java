@@ -21,6 +21,7 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -97,14 +98,23 @@ public class PurchaseOrderService implements PurchaseOrderServiceImplement {
             case "packageCount"   -> item.setPackageCount(Integer.parseInt(dto.value().toString()));
         }
 
-        // avtomatik sum hisoblash
+        // 1) Item sum ni qayta hisoblaymiz
+        BigDecimal price    = item.getPurchasePrice() == null ? BigDecimal.ZERO : item.getPurchasePrice();
+        BigDecimal qty      = item.getQuantity() == null ? BigDecimal.ZERO : item.getQuantity();
+        BigDecimal discount = item.getDiscount() == null ? BigDecimal.ZERO : item.getDiscount();
+
         item.setSum(
-                item.getQuantity().multiply(item.getPurchasePrice())
-                        .subtract(item.getDiscount() == null ? BigDecimal.ZERO : item.getDiscount())
+                qty.multiply(price).subtract(discount)
         );
 
         purchaseOrderItemRepository.save(item);
+
+        // 2) Shu item tegishli bo‘lgan order summalarini qayta hisoblaymiz
+        PurchaseOrder order = item.getPurchaseOrder();
+        // Lazy bo‘lsa ham transaction ichida, muammo yo‘q
+        recalculateOrderTotals(order);
     }
+
 
     @Override
     @Transactional
@@ -154,6 +164,30 @@ public class PurchaseOrderService implements PurchaseOrderServiceImplement {
         purchaseOrderItemRepository.save(poi);
     }
 
+    @Override
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void recalculateOrderTotals(PurchaseOrder order) {
+        BigDecimal total = purchaseOrderItemRepository.calcOrderTotal(order.getId());
+        order.setTotalAmount(total);
+
+        BigDecimal paid = order.getPaidAmount() == null ? BigDecimal.ZERO : order.getPaidAmount();
+        BigDecimal debt = total.subtract(paid);
+        if (debt.compareTo(BigDecimal.ZERO) < 0) {
+            debt = BigDecimal.ZERO; // salomatlik uchun
+        }
+        order.setDebtAmount(debt);
+
+        // paymentStatus ni ham avtomatik qo‘yamiz
+        if (paid.compareTo(BigDecimal.ZERO) == 0) {
+            order.setPaymentStatus(PurchaseOrder.PaymentStatus.UNPAID);
+        } else if (paid.compareTo(total) < 0) {
+            order.setPaymentStatus(PurchaseOrder.PaymentStatus.PARTIAL);
+        } else {
+            order.setPaymentStatus(PurchaseOrder.PaymentStatus.PAID);
+        }
+
+        purchaseOrderRepository.save(order);
+    }
 
     @Override
     @Transactional(readOnly = true)
