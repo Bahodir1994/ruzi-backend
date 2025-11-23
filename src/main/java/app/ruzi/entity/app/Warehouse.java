@@ -15,8 +15,6 @@ import org.hibernate.annotations.ParamDef;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@FilterDef(name = "clientFilter", parameters = @ParamDef(name = "clientId", type = String.class))
-@Filter(name = "clientFilter", condition = "client_id = :clientId")
 @Builder
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Warehouse extends AbstractAuditingEntity {

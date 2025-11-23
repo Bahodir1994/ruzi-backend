@@ -4,6 +4,9 @@ import app.ruzi.configuration.utils.AbstractAuditingEntity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
 
 @Entity
 @Table(name = "suppliers", schema = "ruzi")
@@ -22,10 +25,19 @@ public class Supplier extends AbstractAuditingEntity {
     @Column(nullable = false, length = 150)
     private String name;
 
+    /**
+     * Qaysi klient tizimiga tegishli
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_id", nullable = false)
+    private Client client;
+
     private String phone;
     private String email;
     private String contactPerson;
     private String address;
     private String inn;        // STIR / INN
     private String bankAccount;
+
+    public Supplier(String id) {this.id = id;}
 }
