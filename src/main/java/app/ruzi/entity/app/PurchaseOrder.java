@@ -79,7 +79,7 @@ public class PurchaseOrder extends AbstractAuditingEntity {
      * Har doim to‘ldirilishi shart.
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "warehouse_id", nullable = false)
+    @JoinColumn(name = "warehouse_id")
     private Warehouse warehouse;
 
     /**

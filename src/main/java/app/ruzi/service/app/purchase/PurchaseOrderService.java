@@ -115,7 +115,6 @@ public class PurchaseOrderService implements PurchaseOrderServiceImplement {
         recalculateOrderTotals(order);
     }
 
-
     @Override
     @Transactional
     public void deleteOrder(String orderId) {
@@ -131,6 +130,9 @@ public class PurchaseOrderService implements PurchaseOrderServiceImplement {
     public void deleteItemFromOrder(String orderId, String itemId) {
         if(purchaseOrderRepository.isDraft(orderId, PurchaseOrder.Status.DRAFT)){
             purchaseOrderItemRepository.deleteById(itemId);
+
+            PurchaseOrder order = purchaseOrderRepository.getReferenceById(orderId);
+            recalculateOrderTotals(order);
         }
     }
 
