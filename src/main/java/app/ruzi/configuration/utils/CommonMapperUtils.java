@@ -2,6 +2,7 @@ package app.ruzi.configuration.utils;
 
 import app.ruzi.entity.app.Category;
 import app.ruzi.entity.app.Client;
+import app.ruzi.entity.app.Supplier;
 import app.ruzi.entity.app.Warehouse;
 import org.mapstruct.Named;
 import org.springframework.stereotype.Component;
@@ -112,6 +113,14 @@ public class CommonMapperUtils {
         Warehouse warehouse = new Warehouse();
         warehouse.setId(id.trim());
         return warehouse;
+    }
+
+    @Named("stringToSupplier")
+    public static Supplier stringToSupplier(String id) {
+        if (id == null || id.isBlank()) return null;
+        Supplier supplier = new Supplier();
+        supplier.setId(id.trim());
+        return supplier;
     }
 
     @Named("stringToClient")

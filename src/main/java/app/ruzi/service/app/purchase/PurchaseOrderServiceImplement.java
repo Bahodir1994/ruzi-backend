@@ -4,6 +4,7 @@ import app.ruzi.entity.app.PurchaseOrder;
 import app.ruzi.entity.app.PurchaseOrderItem;
 import app.ruzi.service.payload.app.CreatePurchaseOrderItemDto;
 import app.ruzi.service.payload.app.PurchaseOrderCreatReadDto;
+import app.ruzi.service.payload.app.PurchaseOrderUpdateDto;
 import app.ruzi.service.payload.app.UpdateFieldDto;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
@@ -17,7 +18,7 @@ public interface PurchaseOrderServiceImplement {
 
     PurchaseOrder read(String id);
 
-    void update(PurchaseOrderCreatReadDto requestDTO);
+    void update(PurchaseOrderUpdateDto updateDto);
 
     void updateItem(String id, UpdateFieldDto dto);
 

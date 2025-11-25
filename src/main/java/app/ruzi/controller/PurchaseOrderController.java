@@ -5,10 +5,7 @@ import app.ruzi.configuration.messaging.MessageResponse;
 import app.ruzi.entity.app.PurchaseOrder;
 import app.ruzi.entity.app.PurchaseOrderItem;
 import app.ruzi.service.app.purchase.PurchaseOrderService;
-import app.ruzi.service.payload.app.CreatePurchaseOrderItemDto;
-import app.ruzi.service.payload.app.ItemDto;
-import app.ruzi.service.payload.app.PurchaseOrderCreatReadDto;
-import app.ruzi.service.payload.app.UpdateFieldDto;
+import app.ruzi.service.payload.app.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
@@ -63,12 +60,12 @@ public class PurchaseOrderController {
     public ResponseEntity<Object> update(
             @RequestHeader(value = "Accept-Language", required = false) String langType,
             @PathVariable String id,
-            @Valid @RequestBody PurchaseOrderCreatReadDto creatReadDto,
+            @Valid @RequestBody PurchaseOrderUpdateDto updateDto,
             BindingResult bindingResult
     ) {
-        creatReadDto.setId(id);
+        updateDto.setId(id);
         MessageResponse messageResponse = handlerService.handleRequest(
-                () -> purchaseOrderService.update(creatReadDto),
+                () -> purchaseOrderService.update(updateDto),
                 bindingResult,
                 langType
         );

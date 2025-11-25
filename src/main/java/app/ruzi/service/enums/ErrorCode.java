@@ -37,6 +37,13 @@ public enum ErrorCode {
                     "Only purchase orders in DRAFT status can be deleted",
                     "Faqat QORALAMA holatidagi buyurtmalarni o‘chirsa bo‘ladi",
                     "Удалять можно только заказы в статусе ЧЕРНОВИК"
+    ),
+
+    FORBID0002(
+            "FORBID0002",
+            "Items cannot be deleted from a confirmed order",
+            "Tasdiqlangan kirim partiyasidan tovar o‘chirib bo‘lmaydi",
+            "Товары не могут быть удалены из подтвержденного заказа"
     );
 
     private final String code;

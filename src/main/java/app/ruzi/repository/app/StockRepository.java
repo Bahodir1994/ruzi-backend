@@ -43,4 +43,6 @@ public interface StockRepository extends JpaRepository<Stock, String>, DataTable
             @Param("warehouseId") String warehouseId,
             LockModeType lockMode
     );
+
+    boolean existsByPurchaseOrderItem_IdAndWarehouse_Id(String id, String id1);
 }

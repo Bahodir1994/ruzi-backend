@@ -1,9 +1,7 @@
 package app.ruzi.service.app.stock;
 
-import app.ruzi.entity.app.Item;
-import app.ruzi.entity.app.PurchaseOrderItem;
-import app.ruzi.entity.app.Stock;
-import app.ruzi.entity.app.Unit;
+import app.ruzi.entity.app.*;
+import app.ruzi.repository.app.PurchaseOrderItemRepository;
 import app.ruzi.repository.app.StockRepository;
 import app.ruzi.repository.app.UnitRepository;
 import app.ruzi.service.mappers.StockMapper;
@@ -17,7 +15,10 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 public class StockService implements StockServiceImplement {
     private final StockRepository stockRepository;
     private final UnitRepository unitRepository;
+    private final PurchaseOrderItemRepository purchaseOrderItemRepository;
 
     @Override
     public DataTablesOutput<StockViewDto> getStock(DataTablesInput dataTablesInput) {
@@ -87,10 +89,44 @@ public class StockService implements StockServiceImplement {
         return output;
     }
 
-
     @Override
     public List<Stock> getStockList() {
         return stockRepository.findAll();
     }
 
+    @Override
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void createStockForApprovedPurchaseOrder(PurchaseOrder order) {
+
+        List<PurchaseOrderItem> items =
+                purchaseOrderItemRepository.findByPurchaseOrder_Id(order.getId());
+
+        for (PurchaseOrderItem poi : items) {
+
+            // Agar stock yozuvi mavjud bo‘lsa — yaratmaymiz
+            boolean exists = stockRepository.existsByPurchaseOrderItem_IdAndWarehouse_Id(
+                    poi.getId(),
+                    order.getWarehouse().getId()
+            );
+
+            if (exists) continue;
+
+            BigDecimal qty = poi.getQuantity() != null ? poi.getQuantity() : BigDecimal.ZERO;
+            BigDecimal altQty = poi.getConversionRate() != null
+                    ? qty.multiply(poi.getConversionRate())
+                    : qty;
+
+            Stock stock = Stock.builder()
+                    .client(order.getClient())
+                    .purchaseOrderItem(poi)
+                    .warehouse(order.getWarehouse())
+                    .quantity(qty)
+                    .altQuantity(altQty)
+                    .reservedQuantity(BigDecimal.ZERO)
+                    .reservedAltQuantity(BigDecimal.ZERO)
+                    .build();
+
+            stockRepository.save(stock);
+        }
+    }
 }

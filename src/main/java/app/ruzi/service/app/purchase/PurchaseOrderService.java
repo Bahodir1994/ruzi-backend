@@ -10,9 +10,12 @@ import app.ruzi.entity.app.PurchaseOrderItem;
 import app.ruzi.repository.app.ItemRepository;
 import app.ruzi.repository.app.PurchaseOrderItemRepository;
 import app.ruzi.repository.app.PurchaseOrderRepository;
+import app.ruzi.service.app.stock.StockService;
 import app.ruzi.service.enums.DefValues;
+import app.ruzi.service.mappers.PurchaseOrderMapper;
 import app.ruzi.service.payload.app.CreatePurchaseOrderItemDto;
 import app.ruzi.service.payload.app.PurchaseOrderCreatReadDto;
+import app.ruzi.service.payload.app.PurchaseOrderUpdateDto;
 import app.ruzi.service.payload.app.UpdateFieldDto;
 import jakarta.persistence.criteria.JoinType;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +32,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -42,6 +46,7 @@ public class PurchaseOrderService implements PurchaseOrderServiceImplement {
     private final PurchaseOrderRepository purchaseOrderRepository;
     private final PurchaseOrderItemRepository purchaseOrderItemRepository;
     private final ItemRepository itemRepository;
+    private final StockService stockService;
 
     @Override
     @Transactional
@@ -68,8 +73,52 @@ public class PurchaseOrderService implements PurchaseOrderServiceImplement {
     }
 
     @Override
-    public void update(PurchaseOrderCreatReadDto requestDTO) {
+    @Transactional
+    public void update(PurchaseOrderUpdateDto dto) {
+        UserJwt user = jwtUtils.extractUserFromToken();
 
+        PurchaseOrder order = purchaseOrderRepository.findById(dto.getId()).orElseThrow(() -> new IllegalArgumentException("Order not found"));
+
+        PurchaseOrder temp = PurchaseOrderMapper.INSTANCE.toEntity(dto);
+        PurchaseOrderMapper.INSTANCE.partialUpdate(temp, order);
+
+        BigDecimal total = order.getTotalAmount() == null ? BigDecimal.ZERO : order.getTotalAmount();
+        BigDecimal paid  = order.getPaidAmount() == null ? BigDecimal.ZERO : order.getPaidAmount();
+
+        if (paid.compareTo(BigDecimal.ZERO) == 0) {
+            order.setPaymentStatus(PurchaseOrder.PaymentStatus.UNPAID);
+        } else if (paid.compareTo(total) < 0) {
+            order.setPaymentStatus(PurchaseOrder.PaymentStatus.PARTIAL);
+        } else {
+            order.setPaymentStatus(PurchaseOrder.PaymentStatus.PAID);
+        }
+
+        BigDecimal debt = total.subtract(paid);
+        if (debt.compareTo(BigDecimal.ZERO) < 0) debt = BigDecimal.ZERO;
+        order.setDebtAmount(debt);
+
+        // 5) APPROVE bo‘lsa → approvedAt va stock yaratish
+        if (PurchaseOrder.Status.APPROVED.name().equals(dto.getStatus())) {
+            order.setStatus(PurchaseOrder.Status.APPROVED);
+            order.setApprovedAt(LocalDate.now());
+            order.setApprovedByUserId(user.getUsername());
+
+            purchaseOrderRepository.save(order);
+
+            // Ombor qoldig‘ini yaratish (faqat approved bo‘lganda)
+            stockService.createStockForApprovedPurchaseOrder(order);
+
+            return;
+        }
+
+        // 6) Agar approved bo‘lmasa: faqat update
+        // createdAt va createdBy o‘zgarmaydi!
+        // status dto’dan kelgan bo‘lsa, shu o‘rnatiladi
+        if (dto.getStatus() != null) {
+            order.setStatus(PurchaseOrder.Status.valueOf(dto.getStatus()));
+        }
+
+        purchaseOrderRepository.save(order);
     }
 
     @Override
@@ -133,6 +182,8 @@ public class PurchaseOrderService implements PurchaseOrderServiceImplement {
 
             PurchaseOrder order = purchaseOrderRepository.getReferenceById(orderId);
             recalculateOrderTotals(order);
+        } else {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "FORBID0002");
         }
     }
 

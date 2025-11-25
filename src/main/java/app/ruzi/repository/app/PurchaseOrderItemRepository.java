@@ -35,4 +35,5 @@ public interface PurchaseOrderItemRepository extends JpaRepository<PurchaseOrder
     @EntityGraph(attributePaths = {"purchaseOrder"})
     Optional<PurchaseOrderItem> findById(String id);
 
+    List<PurchaseOrderItem> findByPurchaseOrder_Id(String id);
 }

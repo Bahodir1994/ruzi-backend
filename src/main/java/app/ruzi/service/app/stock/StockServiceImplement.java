@@ -1,5 +1,6 @@
 package app.ruzi.service.app.stock;
 
+import app.ruzi.entity.app.PurchaseOrder;
 import app.ruzi.entity.app.Stock;
 import app.ruzi.service.payload.app.StockViewDto;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
@@ -13,4 +14,5 @@ public interface StockServiceImplement {
 
     List<Stock> getStockList();
 
+    void createStockForApprovedPurchaseOrder(PurchaseOrder order);
 }
