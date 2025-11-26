@@ -349,7 +349,7 @@ public class CartService {
      */
     @Transactional
     public void addCusRef(AddCustomerReferrerToCartDto dto) {
-        CartSession session = cartSessionRepository.findById(dto.cardSessionId())
+        CartSession session = cartSessionRepository.findById(dto.cartSessionId())
                 .orElseThrow(() -> new IllegalArgumentException("Session not found"));
 
         if (dto.type().equals("CUSTOMER")) {
@@ -366,7 +366,7 @@ public class CartService {
      */
     @Transactional
     public void removeCusRef(RemoveCustomerReferrerToCartDto dto) {
-        CartSession session = cartSessionRepository.findById(dto.cardSessionId())
+        CartSession session = cartSessionRepository.findById(dto.cartSessionId())
                 .orElseThrow(() -> new IllegalArgumentException("Session not found"));
 
         switch (dto.type()) {

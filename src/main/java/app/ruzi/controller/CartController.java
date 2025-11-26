@@ -3,7 +3,12 @@ package app.ruzi.controller;
 import app.ruzi.configuration.annotation.auth.MethodInfo;
 import app.ruzi.configuration.messaging.HandlerService;
 import app.ruzi.configuration.messaging.MessageResponse;
+import app.ruzi.entity.app.CartItem;
+import app.ruzi.entity.app.CartSession;
+import app.ruzi.service.app.cart.CartPaymentService;
 import app.ruzi.service.app.cart.CartService;
+import app.ruzi.service.app.cart.PrinterService;
+import app.ruzi.service.app.checkout.CheckoutService;
 import app.ruzi.service.payload.app.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,12 +17,17 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/route-cart")
 @RequiredArgsConstructor
 public class CartController {
 
+    private final PrinterService printerService;
     private final CartService cartService;
+    private final CheckoutService checkoutService;
+    private final CartPaymentService paymentService;
     private final HandlerService handlerService;
 
     @PostMapping("/create")
@@ -149,19 +159,65 @@ public class CartController {
 
     }
 
-    @DeleteMapping("/remove-customer-referrer/{cardSessionId}/{type}")
+    @DeleteMapping("/remove-customer-referrer/{cartSessionId}/{type}")
     @PreAuthorize("hasAuthority('ROLE_CART_CREATE')")
     @MethodInfo(methodName = "delete-cart-item")
     public ResponseEntity<?> deleteCusRef(
             @RequestHeader(value = "Accept-Language", required = false) String langType,
-            @PathVariable("cardSessionId") String cardSessionId,
+            @PathVariable("cartSessionId") String cartSessionId,
             @PathVariable("type") String type
     ) {
         MessageResponse messageResponse = handlerService.handleRequest(
-                () -> cartService.removeCusRef(new RemoveCustomerReferrerToCartDto(cardSessionId, type)),
+                () -> cartService.removeCusRef(new RemoveCustomerReferrerToCartDto(cartSessionId, type)),
                 langType
         );
         return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
+    }
+
+    @PostMapping("/checkout")
+    @PreAuthorize("hasAuthority('ROLE_CART_CREATE')")
+    @MethodInfo(methodName = "checkout-cart-session")
+    public ResponseEntity<?> checkout(
+            @RequestHeader(value = "Accept-Language", required = false) String langType,
+            @Valid @RequestBody CheckoutDto dto,
+            BindingResult bindingResult
+    ) {
+        MessageResponse messageResponse = handlerService.handleRequest(
+                () -> checkoutService.checkout(dto),
+                bindingResult,
+                langType
+        );
+
+        return ResponseEntity
+                .status(messageResponse.getStatus())
+                .body(messageResponse);
+    }
+
+
+    @GetMapping("/payments/{cartSessionId}")
+    @PreAuthorize("hasAuthority('ROLE_CART_READ')")
+    public ResponseEntity<?> getPayments(
+            @RequestHeader(value = "Accept-Language", required = false) String langType,
+            @PathVariable String cartSessionId
+    ) {
+        MessageResponse messageResponse = handlerService.handleRequest(
+                () -> paymentService.getPayments(cartSessionId),
+                langType
+        );
+        return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
+    }
+
+
+    @PostMapping("/print-receipt/{cartId}")
+    public ResponseEntity<?> print(@PathVariable String cartId,
+                                   @RequestParam String printerIp) throws Exception {
+
+        // Faqat ID ni matn qilib yuboramiz
+        String text = "CART SESSION ID:\n" + cartId + "\n";
+
+        printerService.printSimple(printerIp, 9100, text);
+
+        return ResponseEntity.ok("OK");
     }
 
 }

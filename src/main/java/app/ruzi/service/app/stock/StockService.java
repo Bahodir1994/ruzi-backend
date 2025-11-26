@@ -6,6 +6,7 @@ import app.ruzi.repository.app.StockRepository;
 import app.ruzi.repository.app.UnitRepository;
 import app.ruzi.service.mappers.StockMapper;
 import app.ruzi.service.payload.app.StockViewDto;
+import jakarta.persistence.LockModeType;
 import jakarta.persistence.criteria.Fetch;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
@@ -26,6 +27,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class StockService implements StockServiceImplement {
+    private final StockWebSocketService wsService;
+
     private final StockRepository stockRepository;
     private final UnitRepository unitRepository;
     private final PurchaseOrderItemRepository purchaseOrderItemRepository;
@@ -128,5 +131,58 @@ public class StockService implements StockServiceImplement {
 
             stockRepository.save(stock);
         }
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void writeOffItem(CartItem item) {
+
+        String poiId = item.getPurchaseOrderItem().getId();
+        String whId = item.getWarehouse().getId();
+
+        BigDecimal qty = item.getQuantity();
+        BigDecimal altQty = qty.multiply(item.getPurchaseOrderItem().getConversionRate());
+
+        Stock stock = stockRepository.findByPurchaseOrderItemAndWarehouse_Locked(
+                poiId, whId, LockModeType.PESSIMISTIC_WRITE
+        ).orElseThrow(() -> new IllegalStateException("Stock not found"));
+
+        // real chiqim
+        stock.setQuantity(stock.getQuantity().subtract(qty));
+        stock.setAltQuantity(stock.getAltQuantity().subtract(altQty));
+
+        // reserved nol bo‘ladi
+        stock.setReservedQuantity(stock.getReservedQuantity().subtract(qty));
+        stock.setReservedAltQuantity(stock.getReservedAltQuantity().subtract(altQty));
+
+        if (stock.getReservedQuantity().compareTo(BigDecimal.ZERO) < 0)
+            stock.setReservedQuantity(BigDecimal.ZERO);
+        if (stock.getReservedAltQuantity().compareTo(BigDecimal.ZERO) < 0)
+            stock.setReservedAltQuantity(BigDecimal.ZERO);
+
+        stockRepository.save(stock);
+        wsService.broadcastStockUpdate(toDto(stock));
+    }
+
+    /**
+     * yordamchi - natijani dto ga set qilish
+     */
+    private StockViewDto toDto(Stock stock) {
+        BigDecimal available = stock.getQuantity().subtract(stock.getReservedQuantity());
+        BigDecimal availableAlt = stock.getAltQuantity().subtract(stock.getReservedAltQuantity());
+
+        return StockViewDto.builder()
+                .stockId(stock.getId())
+                .quantity(stock.getQuantity())
+                .reservedQuantity(stock.getReservedQuantity())
+                .availableQuantity(available)
+
+                .altQuantity(stock.getAltQuantity())
+                .reservedAltQuantity(stock.getReservedAltQuantity())
+                .availableAltQuantity(availableAlt)
+                .conversionRate(stock.getPurchaseOrderItem().getConversionRate()) // 🆕 qo‘shildi
+
+                .itemName(stock.getPurchaseOrderItem().getItem().getName())
+                .warehouseName(stock.getWarehouse().getName())
+                .build();
     }
 }
