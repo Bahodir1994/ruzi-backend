@@ -1,5 +1,6 @@
 package app.ruzi.service.mappers;
 
+import app.ruzi.configuration.utils.CommonMapperUtils;
 import app.ruzi.entity.tasks.Document;
 import app.ruzi.service.payload.tasks.DocumentResponseDto;
 import org.mapstruct.*;
@@ -7,7 +8,11 @@ import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
-@Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(
+        uses = {CommonMapperUtils.class},
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
+        unmappedTargetPolicy = ReportingPolicy.IGNORE
+)
 public interface DocumentMapper {
     DocumentMapper INSTANCE = Mappers.getMapper(DocumentMapper.class);
 

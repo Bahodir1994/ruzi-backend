@@ -4,8 +4,6 @@ import app.ruzi.entity.app.CartPayment;
 import app.ruzi.entity.app.CartSession;
 import app.ruzi.repository.app.CartPaymentRepository;
 import app.ruzi.repository.app.CartSessionRepository;
-import app.ruzi.service.payload.app.AddPaymentDto;
-import app.ruzi.service.payload.app.AddPaymentResultDto;
 import app.ruzi.service.payload.app.PaymentPartDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

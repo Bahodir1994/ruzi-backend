@@ -32,9 +32,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Service
@@ -83,7 +81,7 @@ public class PurchaseOrderService implements PurchaseOrderServiceImplement {
         PurchaseOrderMapper.INSTANCE.partialUpdate(temp, order);
 
         BigDecimal total = order.getTotalAmount() == null ? BigDecimal.ZERO : order.getTotalAmount();
-        BigDecimal paid  = order.getPaidAmount() == null ? BigDecimal.ZERO : order.getPaidAmount();
+        BigDecimal paid = order.getPaidAmount() == null ? BigDecimal.ZERO : order.getPaidAmount();
 
         if (paid.compareTo(BigDecimal.ZERO) == 0) {
             order.setPaymentStatus(PurchaseOrder.PaymentStatus.UNPAID);
@@ -129,27 +127,27 @@ public class PurchaseOrderService implements PurchaseOrderServiceImplement {
                 .orElseThrow(() -> new RuntimeException("Item not found"));
 
         switch (dto.field()) {
-            case "quantity"       -> item.setQuantity(new BigDecimal(dto.value().toString()));
-            case "purchasePrice"  -> item.setPurchasePrice(new BigDecimal(dto.value().toString()));
-            case "discount"       -> item.setDiscount(new BigDecimal(dto.value().toString()));
-            case "salePrice"      -> item.setSalePrice(new BigDecimal(dto.value().toString()));
-            case "altSalePrice"   -> item.setAltSalePrice(new BigDecimal(dto.value().toString()));
-            case "minimalSum"     -> item.setMinimalSum(new BigDecimal(dto.value().toString()));
-            case "unitCode"       -> item.setUnitCode(dto.value().toString());
-            case "altUnitCode"    -> item.setAltUnitCode(dto.value().toString());
+            case "quantity" -> item.setQuantity(new BigDecimal(dto.value().toString()));
+            case "purchasePrice" -> item.setPurchasePrice(new BigDecimal(dto.value().toString()));
+            case "discount" -> item.setDiscount(new BigDecimal(dto.value().toString()));
+            case "salePrice" -> item.setSalePrice(new BigDecimal(dto.value().toString()));
+            case "altSalePrice" -> item.setAltSalePrice(new BigDecimal(dto.value().toString()));
+            case "minimalSum" -> item.setMinimalSum(new BigDecimal(dto.value().toString()));
+            case "unitCode" -> item.setUnitCode(dto.value().toString());
+            case "altUnitCode" -> item.setAltUnitCode(dto.value().toString());
             case "conversionRate" -> item.setConversionRate(new BigDecimal(dto.value().toString()));
-            case "batchNumber"    -> item.setBatchNumber(dto.value().toString());
+            case "batchNumber" -> item.setBatchNumber(dto.value().toString());
             case "expiryDate" -> {
                 String dt = dto.value().toString();
                 LocalDate localDate = OffsetDateTime.parse(dt).toLocalDate();
                 item.setExpiryDate(localDate);
             }
-            case "packageCount"   -> item.setPackageCount(Integer.parseInt(dto.value().toString()));
+            case "packageCount" -> item.setPackageCount(Integer.parseInt(dto.value().toString()));
         }
 
         // 1) Item sum ni qayta hisoblaymiz
-        BigDecimal price    = item.getPurchasePrice() == null ? BigDecimal.ZERO : item.getPurchasePrice();
-        BigDecimal qty      = item.getQuantity() == null ? BigDecimal.ZERO : item.getQuantity();
+        BigDecimal price = item.getPurchasePrice() == null ? BigDecimal.ZERO : item.getPurchasePrice();
+        BigDecimal qty = item.getQuantity() == null ? BigDecimal.ZERO : item.getQuantity();
         BigDecimal discount = item.getDiscount() == null ? BigDecimal.ZERO : item.getDiscount();
 
         item.setSum(
@@ -167,7 +165,7 @@ public class PurchaseOrderService implements PurchaseOrderServiceImplement {
     @Override
     @Transactional
     public void deleteOrder(String orderId) {
-        if(purchaseOrderRepository.existsByIdAndStatus(orderId, PurchaseOrder.Status.DRAFT)){
+        if (purchaseOrderRepository.existsByIdAndStatus(orderId, PurchaseOrder.Status.DRAFT)) {
             purchaseOrderRepository.deleteByIdAndStatus(orderId, PurchaseOrder.Status.DRAFT);
         } else {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "FORBID0001");
@@ -177,7 +175,7 @@ public class PurchaseOrderService implements PurchaseOrderServiceImplement {
     @Override
     @Transactional
     public void deleteItemFromOrder(String orderId, String itemId) {
-        if(purchaseOrderRepository.isDraft(orderId, PurchaseOrder.Status.DRAFT)){
+        if (purchaseOrderRepository.isDraft(orderId, PurchaseOrder.Status.DRAFT)) {
             purchaseOrderItemRepository.deleteById(itemId);
 
             PurchaseOrder order = purchaseOrderRepository.getReferenceById(orderId);

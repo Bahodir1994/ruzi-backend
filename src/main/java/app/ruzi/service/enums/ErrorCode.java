@@ -34,9 +34,9 @@ public enum ErrorCode {
 
     FORBID0001(
             "FORBID0001",
-                    "Only purchase orders in DRAFT status can be deleted",
-                    "Faqat QORALAMA holatidagi buyurtmalarni o‘chirsa bo‘ladi",
-                    "Удалять можно только заказы в статусе ЧЕРНОВИК"
+            "Only purchase orders in DRAFT status can be deleted",
+            "Faqat QORALAMA holatidagi buyurtmalarni o‘chirsa bo‘ladi",
+            "Удалять можно только заказы в статусе ЧЕРНОВИК"
     ),
 
     FORBID0002(

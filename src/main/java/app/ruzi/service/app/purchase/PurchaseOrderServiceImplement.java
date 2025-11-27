@@ -9,8 +9,6 @@ import app.ruzi.service.payload.app.UpdateFieldDto;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
-import java.util.List;
-
 public interface PurchaseOrderServiceImplement {
 
     /* crud */
