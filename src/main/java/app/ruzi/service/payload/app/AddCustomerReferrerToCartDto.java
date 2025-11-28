@@ -6,7 +6,7 @@ import lombok.Builder;
 @Builder
 public record AddCustomerReferrerToCartDto(
         @NotBlank String id,
-        @NotBlank String cardSessionId,
+        @NotBlank String cartSessionId,
         @NotBlank String type //CUSTOMER / REFERRER
 ) {
 }

@@ -149,20 +149,51 @@ public class CartController {
 
     }
 
-    @DeleteMapping("/remove-customer-referrer/{cardSessionId}/{type}")
+    @DeleteMapping("/remove-customer-referrer/{cartSessionId}/{type}")
     @PreAuthorize("hasAuthority('ROLE_CART_CREATE')")
     @MethodInfo(methodName = "delete-cart-item")
     public ResponseEntity<?> deleteCusRef(
             @RequestHeader(value = "Accept-Language", required = false) String langType,
-            @PathVariable("cardSessionId") String cardSessionId,
+            @PathVariable("cartSessionId") String cartSessionId,
             @PathVariable("type") String type
     ) {
         MessageResponse messageResponse = handlerService.handleRequest(
-                () -> cartService.removeCusRef(new RemoveCustomerReferrerToCartDto(cardSessionId, type)),
+                () -> cartService.removeCusRef(new RemoveCustomerReferrerToCartDto(cartSessionId, type)),
                 langType
         );
         return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
     }
+
+    @PostMapping("/pay")
+    @PreAuthorize("hasAuthority('ROLE_CART_CREATE')")
+    @MethodInfo(methodName = "add-payment")
+    public ResponseEntity<?> addPayment(
+            @RequestHeader(value = "Accept-Language", required = false) String langType,
+            @Valid @RequestBody AddPaymentDto dto
+    ) {
+        MessageResponse messageResponse = handlerService.handleRequest(
+                () -> cartService.addPayment(dto),
+                langType
+        );
+        return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
+    }
+
+
+    @GetMapping("/get-payments/{cartSessionId}")
+    @PreAuthorize("hasAuthority('ROLE_CART_READ')")
+    @MethodInfo(methodName = "get-payments-history")
+    public ResponseEntity<?> getPaymentsHistory(
+            @RequestHeader(value = "Accept-Language", required = false) String langType,
+            @PathVariable("cartSessionId") String cartSessionId
+    ) {
+        MessageResponse messageResponse = handlerService.handleRequest(
+                () -> cartService.getPaymentsHistory(cartSessionId),
+                langType
+        );
+        return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
+    }
+
+
 
 }
 

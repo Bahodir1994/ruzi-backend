@@ -349,7 +349,7 @@ public class CartService {
      */
     @Transactional
     public void addCusRef(AddCustomerReferrerToCartDto dto) {
-        CartSession session = cartSessionRepository.findById(dto.cardSessionId())
+        CartSession session = cartSessionRepository.findById(dto.cartSessionId())
                 .orElseThrow(() -> new IllegalArgumentException("Session not found"));
 
         if (dto.type().equals("CUSTOMER")) {
@@ -366,7 +366,7 @@ public class CartService {
      */
     @Transactional
     public void removeCusRef(RemoveCustomerReferrerToCartDto dto) {
-        CartSession session = cartSessionRepository.findById(dto.cardSessionId())
+        CartSession session = cartSessionRepository.findById(dto.cartSessionId())
                 .orElseThrow(() -> new IllegalArgumentException("Session not found"));
 
         switch (dto.type()) {
@@ -458,7 +458,6 @@ public class CartService {
         return String.format("%s-%05d", prefix, nextNum);
     }
 
-    /** yordamchi - natijani dto ga set qilish */
     /**
      * yordamchi - natijani dto ga set qilish
      */
@@ -482,6 +481,10 @@ public class CartService {
                 .build();
     }
 
+    /** cartpayment ga qiymat yozish */
+    private void  addDataToCartPayment(AddPaymentDto addPaymentDto) {
+        CartPayment cartPayment = new CartPayment();
 
+    }
 }
 
