@@ -36,6 +36,13 @@ public class CartController {
     private final HandlerService handlerService;
     private final CartSessionRepository cartSessionRepository;
 
+    @PostMapping("/data-table-cart")
+    @PreAuthorize("hasAuthority('ROLE_CART_READ')")
+    public ResponseEntity<Object> read_table_data(@RequestBody @Valid DataTablesInput dataTablesInput) {
+        DataTablesOutput<CartSession> privilegeDataTablesOutput = cartService.readTableCart(dataTablesInput);
+        return new ResponseEntity<>(privilegeDataTablesOutput, HttpStatus.OK);
+    }
+
     @PostMapping("/create")
     @PreAuthorize("hasAuthority('ROLE_CART_CREATE')")
     @MethodInfo(methodName = "create-card-session")
