@@ -1,16 +1,14 @@
 package app.ruzi.controller;
 
-import app.ruzi.configuration.annotation.auth.CustomAuthRole;
-import app.ruzi.configuration.annotation.auth.MethodInfo;
 import app.ruzi.configuration.messaging.HandlerService;
 import app.ruzi.configuration.messaging.MessageResponse;
 import app.ruzi.service.app.customer.CustomerService;
+import app.ruzi.service.payload.app.CustomerDto;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/route-customer")
@@ -21,8 +19,7 @@ public class CustomerController {
     private final HandlerService handlerService;
 
     @GetMapping("/get-customers")
-    @CustomAuthRole(roles = {"ROLE_CART_CREATE"})
-    @MethodInfo(methodName = "get-item-quantity")
+    @PreAuthorize("hasAuthority('ROLE_CUS_READ')")
     public ResponseEntity<?> getCustomers(
             @RequestHeader(value = "Accept-Language", required = false) String langType) {
         MessageResponse messageResponse = handlerService.handleRequest(
@@ -32,4 +29,16 @@ public class CustomerController {
         return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
     }
 
+    @PostMapping("/create-customer")
+    @PreAuthorize("hasAuthority('ROLE_CUS_CREATE')")
+    public ResponseEntity<Object> save(
+            @RequestHeader(value = "Accept-Language", required = false) String langType,
+            @Valid @RequestBody CustomerDto customerDto
+    ) {
+        MessageResponse messageResponse = handlerService.handleRequest(
+                () -> customerService.save(customerDto),
+                langType
+        );
+        return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
+    }
 }

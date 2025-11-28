@@ -11,6 +11,9 @@ import app.ruzi.service.app.stock.StockWebSocketService;
 import app.ruzi.service.payload.app.*;
 import jakarta.persistence.LockModeType;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
+import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,7 +54,7 @@ public class CartService {
         if (createCartDto != null && createCartDto.activeSessionId() != null) {
             CartSession existing = cartSessionRepository.findById(createCartDto.activeSessionId()).orElse(null);
 
-            if (existing != null && existing.getStatus() == CartSession.Status.OPEN) {
+            if (existing != null) {
                 return existing;
             }
         }
@@ -458,6 +461,7 @@ public class CartService {
         return String.format("%s-%05d", prefix, nextNum);
     }
 
+    /** yordamchi - natijani dto ga set qilish */
     /**
      * yordamchi - natijani dto ga set qilish
      */
@@ -481,10 +485,13 @@ public class CartService {
                 .build();
     }
 
-    /** cartpayment ga qiymat yozish */
-    private void  addDataToCartPayment(AddPaymentDto addPaymentDto) {
-        CartPayment cartPayment = new CartPayment();
+    @Transactional(readOnly = true)
+    public DataTablesOutput<CartSession> readTableCart(DataTablesInput input) {
+        Specification<CartSession> spec = (root, query, cb) ->
+                cb.isFalse(root.get("isDeleted"));
 
+        return cartSessionRepository.findAll(input, spec);
     }
+
 }
 

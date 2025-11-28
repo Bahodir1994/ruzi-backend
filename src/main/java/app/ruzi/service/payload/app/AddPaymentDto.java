@@ -1,22 +1,21 @@
 package app.ruzi.service.payload.app;
 
-
-import app.ruzi.entity.app.CartSession;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.List;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@Setter
+@Data
 public class AddPaymentDto {
-    private String cartSessionId;  // Savat sessiyasi ID
-    private CartSession.PaymentType method;  // To‘lov usuli: CASH yoki CARD
-    private BigDecimal amount;         // To‘lov miqdori
-    private String externalTxnId;  // Agar bo‘lsa, tashqi tranzaksiya ID
-    private Boolean loading;  // Agar bo‘lsa, tashqi tranzaksiya ID
+
+    private String cartSessionId;
+
+    private List<PaymentPartDto> payments;
+
+    @Data
+    public static class PaymentPartDto {
+        private String method;           // CASH, CARD
+        private BigDecimal amount;
+        private String externalTxnId;
+    }
 }

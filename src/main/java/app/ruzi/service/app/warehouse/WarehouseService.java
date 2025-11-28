@@ -2,9 +2,7 @@ package app.ruzi.service.app.warehouse;
 
 import app.ruzi.configuration.jwt.JwtUtils;
 import app.ruzi.configuration.jwt.UserJwt;
-import app.ruzi.entity.app.Supplier;
 import app.ruzi.entity.app.Warehouse;
-import app.ruzi.repository.app.SupplierRepository;
 import app.ruzi.repository.app.WarehouseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;

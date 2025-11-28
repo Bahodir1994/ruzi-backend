@@ -24,6 +24,5 @@ public class PurchaseOrderUpdateDto {
     private String paidAmount;
 
 
-
 }
 
