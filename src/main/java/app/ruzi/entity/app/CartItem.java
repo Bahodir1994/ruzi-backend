@@ -52,9 +52,28 @@ public class CartItem extends AbstractAuditingEntity {
 
     /**
      * Sotilgan miqdor (kg, litr, dona ...)
+     *
+     * Asosiy birlikdagi miqdor (PACK)
+     * Masalan: 3 rulon
      */
     @Column(nullable = false, precision = 18, scale = 3)
     private BigDecimal quantity = BigDecimal.ZERO;
+
+    /**
+     * Qo‘shimcha birlikdagi miqdor (ALT)
+     * Masalan: 7 metr
+     */
+    @Column(name = "alt_quantity", precision = 18, scale = 3)
+    private BigDecimal altQuantity = BigDecimal.ZERO;
+
+    /**
+     * Umumiy ALT birlik (hisob uchun)
+     * totalAltQuantity = quantity * conversionRate + altQuantity
+     * Masalan: (3 * 20) + 7 = 67 metr
+     */
+    @Column(name = "total_alt_quantity", precision = 18, scale = 3)
+    private BigDecimal totalAltQuantity = BigDecimal.ZERO;
+
 
     /**
      * Sotuv narxi (partiya narxidan olinadi)

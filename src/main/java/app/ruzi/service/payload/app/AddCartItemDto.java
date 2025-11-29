@@ -10,9 +10,12 @@ import java.math.BigDecimal;
 public record AddCartItemDto(
         @NotBlank String sessionId,
         @NotBlank String purchaseOrderItemId,
-        @NotNull BigDecimal quantity,
-        @NotNull BigDecimal unitPrice,
-        @NotBlank String unitType // "PACK" yoki "PCS"
+
+        // Asosiy birlikdagi miqdor (PACK)
+        BigDecimal packQuantity,
+
+        // Qo‘shimcha birlikdagi miqdor (ALT)
+        BigDecimal altQuantity
 ) {
 }
 

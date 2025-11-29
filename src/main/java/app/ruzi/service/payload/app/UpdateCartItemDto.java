@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 @Builder
 public record UpdateCartItemDto(
         @NotBlank String cartItemId,
-        @NotNull BigDecimal newQuantity
+        @NotNull BigDecimal newQuantity,
+        BigDecimal newAltQuantity
 ) {
 }

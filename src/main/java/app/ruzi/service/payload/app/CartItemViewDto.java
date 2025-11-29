@@ -18,6 +18,8 @@ public record CartItemViewDto(
         String warehouseName,
 
         // --- 🔽 PurchaseOrderItem'dan ---
+        String unitCode,
+        Integer packageCount,        // Asl sotuv narxi
         BigDecimal salePrice,        // Asl sotuv narxi
         BigDecimal altSalePrice,        // Asl sotuv narxi birlikda
         BigDecimal minimalSum,       // Minimal sotuv narxi

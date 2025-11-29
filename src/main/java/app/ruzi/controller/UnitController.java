@@ -23,7 +23,7 @@ public class UnitController {
     private final UnitService unitService;
 
     @PostMapping("/data-table-main")
-    @PreAuthorize("hasAuthority('ROLE_CAT_READ')")
+    @PreAuthorize("hasAuthority('ROLE_UNIT_READ')")
     @MethodInfo(methodName = "read-unit-table")
     public ResponseEntity<Object> read_table_data(@RequestBody @Valid DataTablesInput dataTablesInput) {
         DataTablesOutput<Unit> privilegeDataTablesOutput = unitService.getUnit(dataTablesInput);
@@ -31,8 +31,6 @@ public class UnitController {
     }
 
     @GetMapping("/data-list-main")
-    @PreAuthorize("hasAuthority('ROLE_CAT_READ')")
-    @MethodInfo(methodName = "read-unit-list")
     public ResponseEntity<Object> read_list_data(
             @RequestHeader(value = "Accept-Language", required = false) String langType) {
         MessageResponse messageResponse = handlerService.handleRequest(

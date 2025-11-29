@@ -114,16 +114,15 @@ public class StockService implements StockServiceImplement {
 
             if (exists) continue;
 
-            BigDecimal qty = poi.getQuantity() != null ? poi.getQuantity() : BigDecimal.ZERO;
-            BigDecimal altQty = poi.getConversionRate() != null
-                    ? qty.multiply(poi.getConversionRate())
-                    : qty;
+            Integer qty = poi.getQuantity() != null ? poi.getPackageCount() : 0;
+            BigDecimal altQty = BigDecimal.valueOf(qty).multiply(poi.getConversionRate());
+
 
             Stock stock = Stock.builder()
                     .client(order.getClient())
                     .purchaseOrderItem(poi)
                     .warehouse(order.getWarehouse())
-                    .quantity(qty)
+                    .quantity(BigDecimal.valueOf(qty))
                     .altQuantity(altQty)
                     .reservedQuantity(BigDecimal.ZERO)
                     .reservedAltQuantity(BigDecimal.ZERO)

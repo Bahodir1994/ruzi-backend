@@ -44,5 +44,13 @@ public interface StockRepository extends JpaRepository<Stock, String>, DataTable
             LockModeType lockMode
     );
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT s FROM Stock s WHERE s.purchaseOrderItem.id = :purchaseOrderItemId AND s.warehouse.id = :warehouseId")
+    Optional<Stock> findByPurchaseOrderItemIdAndWarehouseId_Locked(
+            @Param("purchaseOrderItemId") String purchaseOrderItemId,
+            @Param("warehouseId") String warehouseId
+    );
+
+
     boolean existsByPurchaseOrderItem_IdAndWarehouse_Id(String id, String id1);
 }

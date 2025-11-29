@@ -32,6 +32,40 @@ public enum ErrorCode {
             "В загруженном документе обнаружена ошибка"
     ),
 
+    ERROR1001(
+            "ERROR1001",
+            "Cart session not found",
+            "Savat topilmadi",
+            "Чек-сессия не найдена"
+    ),
+
+    ERROR1002(
+            "ERROR1002",
+            "Only checked-out carts can be returned",
+            "Faqat yakunlangan savatdan qaytarish mumkin",
+            "Возврат возможен только для закрытых чеков"
+    ),
+
+    ERROR1003(
+            "ERROR1003",
+            "Cart item not found",
+            "Savatdagi mahsulot topilmadi",
+            "Товар в чеке не найден"
+    ),
+
+    ERROR1004(
+            "ERROR1004",
+            "Invalid return quantity",
+            "Qaytarilayotgan miqdor noto‘g‘ri",
+            "Неверное количество для возврата"
+    ),
+
+    ERROR1005(
+            "ERROR1005",
+            "Stock record not found",
+            "Zaxira topilmadi",
+            "Запись склада не найдена"
+    ),
     FORBID0001(
             "FORBID0001",
             "Only purchase orders in DRAFT status can be deleted",

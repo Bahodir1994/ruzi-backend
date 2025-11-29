@@ -9,6 +9,7 @@ import app.ruzi.repository.app.CartSessionRepository;
 import app.ruzi.service.app.cart.CartPaymentService;
 import app.ruzi.service.app.cart.CartService;
 import app.ruzi.service.app.cart.PrinterService;
+import app.ruzi.service.app.cart.ReturnService;
 import app.ruzi.service.app.checkout.CheckoutService;
 import app.ruzi.service.payload.app.*;
 import jakarta.validation.Valid;
@@ -31,6 +32,7 @@ public class CartController {
 
     private final PrinterService printerService;
     private final CartService cartService;
+    private final ReturnService returnService;
     private final CheckoutService checkoutService;
     private final CartPaymentService paymentService;
     private final HandlerService handlerService;
@@ -230,6 +232,25 @@ public class CartController {
                 langType
         );
         return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
+    }
+
+    @PostMapping("/return")
+    @PreAuthorize("hasAuthority('ROLE_CART_CREATE')")
+    @MethodInfo(methodName = "return-cart-items")
+    public ResponseEntity<?> returnItems(
+            @RequestHeader(value = "Accept-Language", required = false) String langType,
+            @Valid @RequestBody ReturnRequest dto,
+            BindingResult bindingResult
+    ) {
+        MessageResponse messageResponse = handlerService.handleRequest(
+                () -> returnService.createReturn(dto),
+                bindingResult,
+                langType
+        );
+
+        return ResponseEntity
+                .status(messageResponse.getStatus())
+                .body(messageResponse);
     }
 
 
