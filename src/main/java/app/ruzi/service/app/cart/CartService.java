@@ -15,8 +15,10 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -154,10 +156,11 @@ public class CartService {
 
 
     /**
-     * Savatchadagi tovar sonini ozgartirish
+     * Savatchadagi tovar miqdorini yangilash (asosiy + alt)
      */
     @Transactional
     public void updateItemQuantity(UpdateCartItemDto dto) {
+
         CartItem item = cartItemRepository.findById(dto.cartItemId())
                 .orElseThrow(() -> new IllegalArgumentException("Cart item topilmadi"));
 
@@ -166,40 +169,76 @@ public class CartService {
                         poi.getId(), LockModeType.PESSIMISTIC_WRITE)
                 .orElseThrow(() -> new IllegalStateException("Stock topilmadi"));
 
-        BigDecimal conversionRate = poi.getConversionRate() != null ? poi.getConversionRate() : BigDecimal.ONE;
+        BigDecimal rate = poi.getConversionRate() != null ? poi.getConversionRate() : BigDecimal.ONE;
 
-        BigDecimal oldQty = item.getQuantity();
-        BigDecimal newQty = dto.newQuantity();
+        // Eski qiymatlar
+        BigDecimal oldPack = item.getQuantity();
+        BigDecimal oldAlt  = item.getAltQuantity() != null ? item.getAltQuantity() : BigDecimal.ZERO;
 
-        // Farqlar (asosiy va alt birlik bo‘yicha)
-        BigDecimal diff = newQty.subtract(oldQty);
-        BigDecimal altDiff = diff.multiply(conversionRate).setScale(6, RoundingMode.HALF_UP);
+        // Yangi qiymatlar
+        BigDecimal newPack = dto.newQuantity();
+        BigDecimal newAlt  = dto.newAltQuantity() != null ? dto.newAltQuantity() : BigDecimal.ZERO;
 
-        // 🔹 Agar orttirilsa
-        if (diff.compareTo(BigDecimal.ZERO) > 0) {
-            BigDecimal availableAlt = stock.getAltQuantity().subtract(stock.getReservedAltQuantity());
-            if (altDiff.compareTo(availableAlt) > 0) {
-                throw new IllegalStateException("Yetarli zaxira yo‘q (alt birlikda)");
+        // ==== FARQLAR ====
+        BigDecimal diffPack = newPack.subtract(oldPack);   // PACK farqi
+        BigDecimal diffAlt  = newAlt.subtract(oldAlt);     // ALT farqi
+
+        // === 1) ZAXIRA TEKSHIRISH ===
+
+        // pack farqidan keladigan ALT ekvivalent (zaxira tekshirish uchun)
+        BigDecimal packDiffAsAlt = diffPack.multiply(rate);
+
+        // jami ALT ekvivalent farqi
+        BigDecimal totalAltDiffEq = packDiffAsAlt.add(diffAlt);
+
+        // mavjud ALT
+        BigDecimal availableAlt = stock.getAltQuantity()
+                .subtract(stock.getReservedQuantity().multiply(rate))
+                .subtract(stock.getReservedAltQuantity());
+
+        if (totalAltDiffEq.compareTo(BigDecimal.ZERO) > 0) {
+            // ALT ekvivalentda ko‘payayotgan bo‘lsa — stock yetadimi?
+            if (totalAltDiffEq.compareTo(availableAlt) > 0) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "FORBID0003");
             }
-
-            stock.setReservedQuantity(stock.getReservedQuantity().add(diff));
-            stock.setReservedAltQuantity(stock.getReservedAltQuantity().add(altDiff));
-        }
-        // 🔹 Agar kamaytirilsa
-        else if (diff.compareTo(BigDecimal.ZERO) < 0) {
-            stock.setReservedQuantity(stock.getReservedQuantity().add(diff)); // diff manfiy
-            stock.setReservedAltQuantity(stock.getReservedAltQuantity().add(altDiff)); // ham manfiy
         }
 
-        // 🔹 Yangilash
-        item.setQuantity(newQty);
-        item.setLineTotal(item.getUnitPrice().multiply(newQty));
+        // === 2) REZERV YOZISH ===
 
+        // PACK rezervni o‘zgartiramiz
+        stock.setReservedQuantity(
+                stock.getReservedQuantity().add(diffPack)
+        );
+
+        // ALT rezervni o‘zgartiramiz (faqat alt qismi!)
+        stock.setReservedAltQuantity(
+                stock.getReservedAltQuantity().add(diffAlt)
+        );
+
+        // === 3) CART ITEM YANGILASH ===
+        item.setQuantity(newPack);
+        item.setAltQuantity(newAlt);
+
+        // ⭐️ Yangi total ALT ekvivalent (cart item uchun)
+        BigDecimal totalAltEq = newPack.multiply(rate).add(newAlt);
+        item.setTotalAltQuantity(totalAltEq);
+
+        // Jami pack ekvivalent (chiqim summasi uchun)
+        BigDecimal totalPackEq = newPack.add(
+                newAlt.divide(rate, 6, RoundingMode.HALF_UP)
+        );
+
+        item.setLineTotal(
+                item.getUnitPrice().multiply(totalPackEq)
+        );
+
+        // save
         stockRepository.save(stock);
         cartItemRepository.save(item);
 
         wsService.broadcastStockUpdate(toDto(stock));
     }
+
 
 
     @Transactional
@@ -258,6 +297,7 @@ public class CartService {
                     .purchaseOrderItemId(poi.getId())
                     .itemName(poi.getItem().getName())
                     .quantity(item.getQuantity())
+                    .altQuantity(item.getAltQuantity())
                     .unitPrice(item.getUnitPrice())
                     .lineTotal(item.getLineTotal())
                     .available(available)
@@ -267,6 +307,7 @@ public class CartService {
 
                     // 🔽 PurchaseOrderItem’dan
                     .unitCode(poi.getUnitCode())
+                    .altUnitCode(poi.getAltUnitCode())
                     .packageCount(poi.getPackageCount())
                     .salePrice(poi.getSalePrice())
                     .altSalePrice(poi.getAltSalePrice())

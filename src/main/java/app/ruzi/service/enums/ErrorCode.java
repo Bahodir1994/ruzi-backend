@@ -78,7 +78,14 @@ public enum ErrorCode {
             "Items cannot be deleted from a confirmed order",
             "Tasdiqlangan kirim partiyasidan tovar o‘chirib bo‘lmaydi",
             "Товары не могут быть удалены из подтвержденного заказа"
+    ),
+    FORBID0003(
+            "FORBID0003",
+            "There is not enough balance in the requested unit.",
+            "So'ralgan birlikda qoldiq yetarli emas!",
+            "Недостаточный количество в запрашиваемой единице."
     );
+
 
     private final String code;
     private final String en;

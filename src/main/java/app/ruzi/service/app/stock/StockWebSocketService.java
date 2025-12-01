@@ -13,5 +13,9 @@ public class StockWebSocketService {
     public void broadcastStockUpdate(StockViewDto dto) {
         template.convertAndSend("/topic/stock-updates", dto);
     }
+
+    public void broadcastCartListUpdate() {
+        template.convertAndSend("/topic/carts", "UPDATED");
+    }
 }
 

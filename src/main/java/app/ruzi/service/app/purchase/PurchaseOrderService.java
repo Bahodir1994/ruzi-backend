@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -130,19 +131,66 @@ public class PurchaseOrderService implements PurchaseOrderServiceImplement {
             case "quantity" -> item.setQuantity(new BigDecimal(dto.value().toString()));
             case "purchasePrice" -> item.setPurchasePrice(new BigDecimal(dto.value().toString()));
             case "discount" -> item.setDiscount(new BigDecimal(dto.value().toString()));
-            case "salePrice" -> item.setSalePrice(new BigDecimal(dto.value().toString()));
-            case "altSalePrice" -> item.setAltSalePrice(new BigDecimal(dto.value().toString()));
+            case "salePrice" -> {
+                item.setSalePrice(new BigDecimal(dto.value().toString()));
+                BigDecimal convRate = item.getConversionRate();
+                if (convRate == null || convRate.compareTo(BigDecimal.ZERO) == 0) {
+                    convRate = BigDecimal.ONE; // default 1
+                }
+
+                item.setAltSalePrice(
+                        item.getSalePrice()
+                                .divide(convRate, 0, RoundingMode.CEILING)
+                );
+            }
+            case "altSalePrice" ->
+                    item.setAltSalePrice(
+                            new BigDecimal(dto.value().toString())
+                                    .setScale(0, RoundingMode.CEILING)
+                    );
             case "minimalSum" -> item.setMinimalSum(new BigDecimal(dto.value().toString()));
             case "unitCode" -> item.setUnitCode(dto.value().toString());
             case "altUnitCode" -> item.setAltUnitCode(dto.value().toString());
-            case "conversionRate" -> item.setConversionRate(new BigDecimal(dto.value().toString()));
+            case "conversionRate" -> {
+                BigDecimal convRate = new BigDecimal(dto.value().toString());
+                if (convRate.compareTo(BigDecimal.ZERO) == 0) {
+                    convRate = BigDecimal.ONE;
+                }
+                item.setConversionRate(convRate);
+
+                Integer packCount = item.getPackageCount();
+                if (packCount == null || packCount == 0) {
+                    packCount = 1;
+                }
+
+                item.setQuantity(convRate.multiply(BigDecimal.valueOf(packCount)));
+
+                if (item.getSalePrice() != null) {
+                    item.setAltSalePrice(
+                            item.getSalePrice()
+                                    .divide(convRate, 0, RoundingMode.CEILING)
+                    );
+                }
+            }
             case "batchNumber" -> item.setBatchNumber(dto.value().toString());
             case "expiryDate" -> {
                 String dt = dto.value().toString();
                 LocalDate localDate = OffsetDateTime.parse(dt).toLocalDate();
                 item.setExpiryDate(localDate);
             }
-            case "packageCount" -> item.setPackageCount(Integer.parseInt(dto.value().toString()));
+            case "packageCount" -> {
+                int packCount = Integer.parseInt(dto.value().toString());
+                if (packCount == 0) {
+                    packCount = 1;
+                }
+                item.setPackageCount(packCount);
+
+                BigDecimal convRate = item.getConversionRate();
+                if (convRate == null || convRate.compareTo(BigDecimal.ZERO) == 0) {
+                    convRate = BigDecimal.ONE;
+                }
+                item.setQuantity(convRate.multiply(BigDecimal.valueOf(packCount)));
+            }
         }
 
         // 1) Item sum ni qayta hisoblaymiz
