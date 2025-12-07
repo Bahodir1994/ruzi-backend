@@ -57,7 +57,7 @@ public class CartPaymentService {
         private boolean hasCard;
     }
 
-    public java.util.List<CartPayment> getPayments(String cartSessionId) {
+    public List<CartPayment> getPayments(String cartSessionId) {
         return paymentRepo.findByCartSession_IdOrderByPaidAtAsc(cartSessionId);
     }
 }

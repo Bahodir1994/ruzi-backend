@@ -45,6 +45,26 @@ public class CartController {
         return new ResponseEntity<>(privilegeDataTablesOutput, HttpStatus.OK);
     }
 
+    @PostMapping("/data-table-cart-main-cart")
+    @PreAuthorize("hasAuthority('ROLE_CART_READ')")
+    public ResponseEntity<Object> read_table_data_main_cart(@RequestBody @Valid DataTablesInput dataTablesInput) {
+        DataTablesOutput<CartSession> privilegeDataTablesOutput = cartService.readTableCartForMainCartMenu(dataTablesInput);
+        return new ResponseEntity<>(privilegeDataTablesOutput, HttpStatus.OK);
+    }
+
+    @GetMapping("/stats")
+    @PreAuthorize("hasAuthority('ROLE_CART_READ')")
+    public ResponseEntity<Object> getStats(
+            @RequestHeader(value = "Accept-Language", required = false) String langType,
+            @RequestParam String period) {
+
+        MessageResponse messageResponse = handlerService.handleRequest(
+                () -> cartService.getStatistics(period),
+                langType
+        );
+        return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
+    }
+
     @PostMapping("/create")
     @PreAuthorize("hasAuthority('ROLE_CART_CREATE')")
     @MethodInfo(methodName = "create-card-session")

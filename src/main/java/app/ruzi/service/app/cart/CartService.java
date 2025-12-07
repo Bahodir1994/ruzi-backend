@@ -1,5 +1,6 @@
 package app.ruzi.service.app.cart;
 
+import app.ruzi.configuration.datatables.DateRangeSpecification;
 import app.ruzi.configuration.jwt.JwtUtils;
 import app.ruzi.configuration.jwt.UserJwt;
 import app.ruzi.entity.app.*;
@@ -520,7 +521,6 @@ public class CartService {
         return String.format("%s-%05d", prefix, nextNum);
     }
 
-    /** yordamchi - natijani dto ga set qilish */
     /**
      * yordamchi - natijani dto ga set qilish
      */
@@ -555,14 +555,65 @@ public class CartService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
+    public CartSessionStats getStatistics(String period) {
+
+        LocalDate now = LocalDate.now();
+        LocalDate startDate = now;
+
+        switch (period) {
+            case "day" -> startDate = now;
+            case "week" -> startDate = now.minusWeeks(1);
+            case "month" -> startDate = now.minusMonths(1);
+            case "3month" -> startDate = now.minusMonths(3);
+            case "6month" -> startDate = now.minusMonths(6);
+            case "year" -> startDate = now.minusYears(1);
+        }
+
+        return cartSessionRepository.getCartStatistics(startDate.atStartOfDay());
+    }
+
+
 
     @Transactional(readOnly = true)
     public DataTablesOutput<CartSession> readTableCart(DataTablesInput input) {
         Specification<CartSession> spec = (root, query, cb) ->
                 cb.isFalse(root.get("isDeleted"));
 
+        spec = spec.and(new DateRangeSpecification<>(input, "createdAt", "createdAt"));
+
         return cartSessionRepository.findAll(input, spec);
     }
+
+    @Transactional(readOnly = true)
+    public DataTablesOutput<CartSession> readTableCartForMainCartMenu(DataTablesInput input) {
+
+        Specification<CartSession> spec = (root, query, cb) ->
+                cb.isFalse(root.get("isDeleted"));
+
+        // 1) DATE RANGE FILTER
+        spec = spec.and(new DateRangeSpecification<>(input, "createdAt", "createdAt"));
+
+        // 2) PAYMENT TYPE exact filter
+        String paymentTypeFilter = input.getColumn("paymentType").getSearch().getValue();
+        if (paymentTypeFilter != null && !paymentTypeFilter.isEmpty()) {
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(root.get("paymentType"), paymentTypeFilter)
+            );
+        }
+
+        // 3) PAYMENT STATUS exact filter
+        String paymentStatusFilter = input.getColumn("paymentStatus").getSearch().getValue();
+        if (paymentStatusFilter != null && !paymentStatusFilter.isEmpty()) {
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(root.get("paymentStatus"), paymentStatusFilter)
+            );
+        }
+
+        return cartSessionRepository.findAll(input, spec);
+    }
+
+
 
 }
 
