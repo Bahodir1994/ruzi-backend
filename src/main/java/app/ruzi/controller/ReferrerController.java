@@ -32,6 +32,19 @@ public class ReferrerController {
         return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
     }
 
+    @GetMapping("/get-referrer/{id}")
+    @PreAuthorize("hasAuthority('ROLE_REF_READ')")
+    public ResponseEntity<?> getReferrer(
+            @RequestHeader(value = "Accept-Language", required = false) String langType,
+            @PathVariable("id") String id
+    ) {
+        MessageResponse messageResponse = handlerService.handleRequest(
+                () -> referrerService.getReferrerByCart(id),
+                langType
+        );
+        return ResponseEntity.status(messageResponse.getStatus()).body(messageResponse);
+    }
+
     @PostMapping("/create-referrer")
     @PreAuthorize("hasAuthority('ROLE_REF_CREATE')")
     public ResponseEntity<Object> save(

@@ -2,6 +2,7 @@ package app.ruzi.service.app.referrer;
 
 import app.ruzi.configuration.jwt.JwtUtils;
 import app.ruzi.entity.app.CartSession;
+import app.ruzi.entity.app.Customer;
 import app.ruzi.entity.app.Referral;
 import app.ruzi.entity.app.Referrer;
 import app.ruzi.repository.app.ReferralRepository;
@@ -30,6 +31,14 @@ public class ReferrerService {
     @Transactional(readOnly = true)
     public List<Referrer> getAllReferrers() {
         return referrerRepository.findAll();
+    }
+
+    /**
+     * cart boyicha xamkor berish
+     */
+    @Transactional(readOnly = true)
+    public Referrer getReferrerByCart(String byId) {
+        return referrerRepository.findById(byId).orElse(null);
     }
 
     @Transactional(propagation = Propagation.MANDATORY)
